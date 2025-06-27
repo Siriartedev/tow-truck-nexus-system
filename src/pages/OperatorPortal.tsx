@@ -1,26 +1,10 @@
-
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { 
-  Home, 
-  Clock, 
-  CheckCircle, 
-  ArrowLeft,
-  User,
-  Phone,
-  Mail,
-  Calendar,
-  MapPin,
-  Truck
-} from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { Service } from '@/types/services';
 import { OperatorAuth } from '@/types/operator-portal';
 import OperatorLogin from '@/components/operator-portal/OperatorLogin';
 import ServiceInspectionForm from '@/components/operator-portal/ServiceInspectionForm';
+import OperatorHeader from '@/components/operator-portal/portal/OperatorHeader';
+import ServiceTabs from '@/components/operator-portal/portal/ServiceTabs';
 
 // Mock data - En producción vendría de la API
 const mockOperator: OperatorAuth = {
@@ -86,7 +70,6 @@ export default function OperatorPortal() {
   const [activeTab, setActiveTab] = useState('assigned');
   const [operator, setOperator] = useState<OperatorAuth | null>(null);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
-  const navigate = useNavigate();
 
   // Filtrar servicios por estado
   const assignedServices = mockAssignedServices.filter(s => s.status === 'pending');
@@ -105,61 +88,10 @@ export default function OperatorPortal() {
     setSelectedService(null);
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">Asignado</Badge>;
-      case 'in_progress':
-        return <Badge variant="secondary" className="bg-blue-100 text-blue-800">En Progreso</Badge>;
-      case 'completed':
-        return <Badge variant="secondary" className="bg-green-100 text-green-800">Completado</Badge>;
-      default:
-        return <Badge variant="secondary">Desconocido</Badge>;
-    }
-  };
-
-  const ServiceCard = ({ service }: { service: Service }) => (
-    <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => handleServiceClick(service)}>
-      <CardHeader className="pb-3">
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle className="text-lg font-semibold text-foreground">
-              {service.folio}
-            </CardTitle>
-            <p className="text-sm text-muted-foreground mt-1">{service.client_name}</p>
-          </div>
-          {getStatusBadge(service.status)}
-        </div>
-      </CardHeader>
-      <CardContent className="pt-0">
-        <div className="space-y-2">
-          <div className="flex items-center text-sm text-muted-foreground">
-            <Calendar className="h-4 w-4 mr-2" />
-            <span>{new Date(service.service_date).toLocaleDateString('es-MX')}</span>
-          </div>
-          <div className="flex items-center text-sm text-muted-foreground">
-            <Truck className="h-4 w-4 mr-2" />
-            <span>{service.vehicle_brand} {service.vehicle_model} - {service.license_plate}</span>
-          </div>
-          <div className="flex items-center text-sm text-muted-foreground">
-            <MapPin className="h-4 w-4 mr-2" />
-            <span className="line-clamp-1">{service.pickup_location}</span>
-          </div>
-          <div className="flex items-center text-sm text-muted-foreground">
-            <MapPin className="h-4 w-4 mr-2" />
-            <span className="line-clamp-1">{service.delivery_location}</span>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-
-  // Si no hay operador logueado, mostrar login
   if (!operator) {
     return <OperatorLogin onLogin={handleLogin} />;
   }
 
-  // Si hay un servicio seleccionado, mostrar formulario de inspección
   if (selectedService) {
     return (
       <ServiceInspectionForm 
@@ -172,85 +104,17 @@ export default function OperatorPortal() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-gradient-green shadow-sm border-b border-green-darker/20 px-4 py-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Link to="/">
-              <Button variant="ghost" size="sm" className="text-black hover:bg-white/10">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Volver al Sistema
-              </Button>
-            </Link>
-            <div>
-              <h1 className="text-2xl font-bold text-black">Portal del Operador</h1>
-              <p className="text-sm text-black/80">{operator.name}</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-2 text-black">
-            <User className="h-4 w-4" />
-            <span className="text-sm">{operator.name}</span>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
+      <OperatorHeader operator={operator} />
+      
       <div className="p-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8">
-            <TabsTrigger value="assigned" className="flex items-center space-x-2">
-              <Home className="h-4 w-4" />
-              <span>Asignados ({assignedServices.length})</span>
-            </TabsTrigger>
-            <TabsTrigger value="active" className="flex items-center space-x-2">
-              <Clock className="h-4 w-4" />
-              <span>Activos ({activeServices.length})</span>
-            </TabsTrigger>
-            <TabsTrigger value="completed" className="flex items-center space-x-2">
-              <CheckCircle className="h-4 w-4" />
-              <span>Completados ({completedServices.length})</span>
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="assigned">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {assignedServices.map((service) => (
-                <ServiceCard key={service.id} service={service} />
-              ))}
-              {assignedServices.length === 0 && (
-                <div className="col-span-full text-center py-8">
-                  <p className="text-muted-foreground">No tienes servicios asignados</p>
-                </div>
-              )}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="active">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {activeServices.map((service) => (
-                <ServiceCard key={service.id} service={service} />
-              ))}
-              {activeServices.length === 0 && (
-                <div className="col-span-full text-center py-8">
-                  <p className="text-muted-foreground">No tienes servicios activos</p>
-                </div>
-              )}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="completed">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {completedServices.map((service) => (
-                <ServiceCard key={service.id} service={service} />
-              ))}
-              {completedServices.length === 0 && (
-                <div className="col-span-full text-center py-8">
-                  <p className="text-muted-foreground">No tienes servicios completados</p>
-                </div>
-              )}
-            </div>
-          </TabsContent>
-        </Tabs>
+        <ServiceTabs
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          assignedServices={assignedServices}
+          activeServices={activeServices}
+          completedServices={completedServices}
+          onServiceClick={handleServiceClick}
+        />
       </div>
     </div>
   );

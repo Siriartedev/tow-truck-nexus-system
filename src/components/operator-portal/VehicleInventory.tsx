@@ -4,10 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { CheckSquare, Square, User, ArrowRight, ArrowLeft, X } from 'lucide-react';
-import { ServiceInspection, InspectionItem } from '@/types/operator-portal';
+import { ArrowRight, ArrowLeft, X } from 'lucide-react';
+import { ServiceInspection } from '@/types/operator-portal';
+import InventoryProgress from './inventory/InventoryProgress';
+import ClientInfo from './inventory/ClientInfo';
 
 interface VehicleInventoryProps {
   inspection: ServiceInspection;
@@ -44,7 +45,6 @@ export default function VehicleInventory({ inspection, onUpdate, onNext, onPrevi
       inspection_items: updatedItems
     });
 
-    // Actualizar estado de "todos seleccionados"
     const allItemsChecked = updatedItems.every(item => item.checked);
     setAllChecked(allItemsChecked);
   };
@@ -57,81 +57,14 @@ export default function VehicleInventory({ inspection, onUpdate, onNext, onPrevi
     });
   };
 
-  const handleObservationsChange = (observations: string) => {
-    onUpdate({
-      ...inspection,
-      observations
-    });
-  };
-
-  const handleClientNameChange = (client_present_name: string) => {
-    onUpdate({
-      ...inspection,
-      client_present_name
-    });
-  };
-
-  const groupedItems = inspection.inspection_items.reduce((acc, item) => {
-    if (!acc[item.category]) {
-      acc[item.category] = [];
-    }
-    acc[item.category].push(item);
-    return acc;
-  }, {} as Record<string, InspectionItem[]>);
-
-  const categoryNames = {
-    interior: 'Interior del Vehículo',
-    motor: 'Motor y Mecánica', 
-    exterior: 'Exterior del Vehículo',
-    seguridad: 'Elementos de Seguridad',
-    herramientas: 'Herramientas',
-    otros: 'Otros Elementos'
-  };
-
-  const checkedCount = inspection.inspection_items.filter(item => item.checked).length;
-  const totalCount = inspection.inspection_items.length;
-
   return (
     <div className="space-y-6">
-      {/* Progress Header */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center space-x-2">
-              <CheckSquare className="h-5 w-5 text-green-600" />
-              <span>Inventario del Vehículo</span>
-            </CardTitle>
-            <div className="text-sm text-muted-foreground">
-              {checkedCount} de {totalCount} elementos verificados
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between mb-4">
-            <Button
-              variant="outline"
-              onClick={handleToggleAll}
-              className="flex items-center space-x-2"
-            >
-              {allChecked ? <Square className="h-4 w-4" /> : <CheckSquare className="h-4 w-4" />}
-              <span>{allChecked ? 'Desmarcar Todo' : 'Marcar Todo'}</span>
-            </Button>
-            
-            <div className="text-sm font-medium">
-              Progreso: {Math.round((checkedCount / totalCount) * 100)}%
-            </div>
-          </div>
+      <InventoryProgress 
+        inspection={inspection}
+        allChecked={allChecked}
+        onToggleAll={handleToggleAll}
+      />
 
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
-              className="bg-green-600 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${(checkedCount / totalCount) * 100}%` }}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Inventory Items as List */}
       <Card>
         <CardHeader>
           <CardTitle>Elementos de Inspección</CardTitle>
@@ -176,28 +109,11 @@ export default function VehicleInventory({ inspection, onUpdate, onNext, onPrevi
         </CardContent>
       </Card>
 
-      {/* Client Information */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <User className="h-5 w-5" />
-            <span>Información del Cliente</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="client-name">Nombre del Cliente (si está presente)</Label>
-            <Input
-              id="client-name"
-              placeholder="Nombre completo del cliente presente durante la inspección"
-              value={inspection.client_present_name || ''}
-              onChange={(e) => handleClientNameChange(e.target.value)}
-            />
-          </div>
-        </CardContent>
-      </Card>
+      <ClientInfo 
+        clientName={inspection.client_present_name || ''}
+        onClientNameChange={(name) => onUpdate({ ...inspection, client_present_name: name })}
+      />
 
-      {/* Observations */}
       <Card>
         <CardHeader>
           <CardTitle>Observaciones del Vehículo</CardTitle>
@@ -206,13 +122,12 @@ export default function VehicleInventory({ inspection, onUpdate, onNext, onPrevi
           <Textarea
             placeholder="Describe el estado general del vehículo, daños visibles, condiciones especiales, etc."
             value={inspection.observations}
-            onChange={(e) => handleObservationsChange(e.target.value)}
+            onChange={(e) => onUpdate({ ...inspection, observations: e.target.value })}
             rows={4}
           />
         </CardContent>
       </Card>
 
-      {/* Navigation */}
       <div className="flex justify-between items-center pt-6">
         {onPrevious ? (
           <Button onClick={onPrevious} variant="outline" size="lg" className="flex items-center space-x-2">

@@ -1,14 +1,10 @@
+
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, FileText, Camera, PenTool, Save, CheckCircle } from 'lucide-react';
 import { Service } from '@/types/services';
 import { OperatorAuth, ServiceInspection, DEFAULT_INSPECTION_ITEMS } from '@/types/operator-portal';
-import VehicleInventory from './VehicleInventory';
-import PhotoCapture from './PhotoCapture';
-import DigitalSignatures from './DigitalSignatures';
+import InspectionHeader from './inspection/InspectionHeader';
+import ServiceDetails from './inspection/ServiceDetails';
+import InspectionTabs from './inspection/InspectionTabs';
 import { toast } from 'sonner';
 
 interface ServiceInspectionFormProps {
@@ -35,7 +31,6 @@ export default function ServiceInspectionForm({ service, operator, onBack }: Ser
   });
 
   const handleCompleteInspection = async () => {
-    // Validaciones
     const hasMinimumPhotos = inspection.photos.filter(p => p.file).length >= 1;
     const hasOperatorSignature = inspection.signatures.operator;
     const hasClientSignature = inspection.signatures.client;
@@ -59,11 +54,6 @@ export default function ServiceInspectionForm({ service, operator, onBack }: Ser
     }
 
     try {
-      // Aquí iría la llamada a la API para:
-      // 1. Guardar la inspección
-      // 2. Actualizar el estado del servicio a 'in_progress'
-      // 3. Subir las fotos
-      
       const updatedInspection = {
         ...inspection,
         completed_at: new Date().toISOString()
@@ -73,7 +63,6 @@ export default function ServiceInspectionForm({ service, operator, onBack }: Ser
       
       toast.success('Inspección completada exitosamente. El servicio ahora está en progreso.');
       
-      // Volver a la lista de servicios
       onBack();
     } catch (error) {
       toast.error('Error al completar la inspección');
@@ -89,132 +78,26 @@ export default function ServiceInspectionForm({ service, operator, onBack }: Ser
     return hasMinimumPhotos && hasOperatorSignature && hasClientSignature;
   };
 
-  const getTabIcon = (tab: string) => {
-    switch (tab) {
-      case 'inventory': return <FileText className="h-4 w-4" />;
-      case 'photos': return <Camera className="h-4 w-4" />;
-      case 'signatures': return <PenTool className="h-4 w-4" />;
-      default: return null;
-    }
-  };
-
-  const getCompletionStatus = (tab: string) => {
-    switch (tab) {
-      case 'inventory':
-        return inspection.inspection_items.some(item => item.checked);
-      case 'photos':
-        return inspection.photos.length >= 1;
-      case 'signatures':
-        return inspection.signatures.operator && inspection.signatures.client;
-      default:
-        return false;
-    }
-  };
-
   return (
     <div className="min-h-screen bg-background pb-20">
-      {/* Header */}
-      <header className="bg-gradient-green shadow-sm border-b border-green-darker/20 px-4 py-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="sm" className="text-black hover:bg-white/10" onClick={onBack}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Volver a Servicios
-            </Button>
-            <div>
-              <h1 className="text-xl font-bold text-black">Inspección Pre-Servicio</h1>
-              <p className="text-sm text-black/80">{service.folio} - {service.client_name}</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-4">
-            <Badge variant="secondary" className="bg-white/20 text-black">
-              {service.status === 'pending' ? 'Pendiente' : 'En Progreso'}
-            </Badge>
-            {/* Moved Complete Inspection Button to Header */}
-            <Button 
-              onClick={handleCompleteInspection}
-              size="sm"
-              disabled={!isFormValid()}
-              className={`${
-                isFormValid() 
-                  ? 'bg-white text-green-700 hover:bg-gray-100' 
-                  : 'bg-gray-400 cursor-not-allowed'
-              }`}
-            >
-              <Save className="h-4 w-4 mr-2" />
-              Completar
-            </Button>
-          </div>
-        </div>
-      </header>
+      <InspectionHeader
+        service={service}
+        operator={operator}
+        isFormValid={isFormValid()}
+        onBack={onBack}
+        onComplete={handleCompleteInspection}
+      />
 
-      {/* Service Details */}
-      <div className="p-6 bg-card border-b">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
-          <div>
-            <span className="font-medium text-muted-foreground">Cliente:</span>
-            <p className="font-semibold">{service.client_name}</p>
-          </div>
-          <div>
-            <span className="font-medium text-muted-foreground">Vehículo:</span>
-            <p className="font-semibold">{service.vehicle_brand} {service.vehicle_model}</p>
-            <p className="text-muted-foreground">{service.license_plate}</p>
-          </div>
-          <div>
-            <span className="font-medium text-muted-foreground">Origen:</span>
-            <p className="font-semibold line-clamp-2">{service.pickup_location}</p>
-          </div>
-          <div>
-            <span className="font-medium text-muted-foreground">Destino:</span>
-            <p className="font-semibold line-clamp-2">{service.delivery_location}</p>
-          </div>
-        </div>
-      </div>
+      <ServiceDetails service={service} />
 
-      {/* Main Content */}
       <div className="p-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6">
-            {['inventory', 'photos', 'signatures'].map((tab) => (
-              <TabsTrigger key={tab} value={tab} className="flex items-center space-x-2 relative">
-                {getTabIcon(tab)}
-                <span className="capitalize">
-                  {tab === 'inventory' ? 'Inventario' : 
-                   tab === 'photos' ? 'Fotografías' : 'Firmas'}
-                </span>
-                {getCompletionStatus(tab) && (
-                  <CheckCircle className="h-3 w-3 text-green-600 absolute -top-1 -right-1" />
-                )}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-
-          <TabsContent value="inventory">
-            <VehicleInventory 
-              inspection={inspection}
-              onUpdate={setInspection}
-              onNext={() => setActiveTab('photos')}
-            />
-          </TabsContent>
-
-          <TabsContent value="photos">
-            <PhotoCapture 
-              inspection={inspection}
-              onUpdate={setInspection}
-              onNext={() => setActiveTab('signatures')}
-              onPrevious={() => setActiveTab('inventory')}
-            />
-          </TabsContent>
-
-          <TabsContent value="signatures">
-            <DigitalSignatures 
-              inspection={inspection}
-              onUpdate={setInspection}
-              onPrevious={() => setActiveTab('photos')}
-              operatorName={operator.name}
-            />
-          </TabsContent>
-        </Tabs>
+        <InspectionTabs
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          inspection={inspection}
+          setInspection={setInspection}
+          operatorName={operator.name}
+        />
       </div>
     </div>
   );

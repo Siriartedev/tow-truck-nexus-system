@@ -1,10 +1,10 @@
 
 import { useState, useRef } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Camera, Upload, X, ArrowLeft, ArrowRight, CheckCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { ServiceInspection, ServicePhoto, PHOTO_TYPES } from '@/types/operator-portal';
+import PhotoProgress from './photos/PhotoProgress';
+import PhotoSection from './photos/PhotoSection';
 import { toast } from 'sonner';
 
 interface PhotoCaptureProps {
@@ -39,7 +39,6 @@ export default function PhotoCapture({ inspection, onUpdate, onNext, onPrevious 
       timestamp: new Date().toISOString()
     };
 
-    // Reemplazar foto existente del mismo tipo o agregar nueva
     const updatedPhotos = inspection.photos.filter(p => p.type !== photoType);
     updatedPhotos.push(newPhoto);
 
@@ -67,168 +66,30 @@ export default function PhotoCapture({ inspection, onUpdate, onNext, onPrevious 
     }
   };
 
-  const getPhotoForType = (type: string) => {
-    return inspection.photos.find(p => p.type === type);
-  };
-
   const requiredPhotos = PHOTO_TYPES.filter(t => t.required);
   const optionalPhotos = PHOTO_TYPES.filter(t => !t.required);
-  // Changed: Only require minimum 1 photo total, not all required photos
   const hasMinimumPhotos = inspection.photos.filter(p => p.file).length >= 1;
 
   return (
     <div className="space-y-6">
-      {/* Progress Indicator */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Camera className="h-5 w-5 text-blue-600" />
-            <span>Captura de Fotografías</span>
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Toma al menos 1 fotografía del vehículo. Las marcadas como requeridas son recomendadas.
-          </p>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between">
-            <div className="text-sm">
-              Fotos tomadas: {inspection.photos.length} de {PHOTO_TYPES.length}
-            </div>
-            <div className="flex items-center space-x-2">
-              {hasMinimumPhotos ? (
-                <Badge variant="secondary" className="bg-green-100 text-green-800">
-                  <CheckCircle className="h-3 w-3 mr-1" />
-                  Mínimo de fotos completo
-                </Badge>
-              ) : (
-                <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
-                  Se requiere al menos 1 foto
-                </Badge>
-              )}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <PhotoProgress inspection={inspection} />
 
-      {/* Required Photos */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Fotografías Recomendadas</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {requiredPhotos.map((photoType) => {
-              const existingPhoto = getPhotoForType(photoType.id);
-              return (
-                <div key={photoType.id} className="border rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-medium">{photoType.name}</h3>
-                    <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-800">Recomendada</Badge>
-                  </div>
-                  
-                  {existingPhoto ? (
-                    <div className="space-y-3">
-                      <div className="relative">
-                        <img
-                          src={URL.createObjectURL(existingPhoto.file!)}
-                          alt={photoType.name}
-                          className="w-full h-32 object-cover rounded border"
-                        />
-                        <button
-                          onClick={() => handleRemovePhoto(existingPhoto.id)}
-                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </div>
-                      <Button
-                        variant="outline"
-                        onClick={() => triggerFileInput(photoType.id)}
-                        className="w-full"
-                      >
-                        <Upload className="h-4 w-4 mr-2" />
-                        Reemplazar Foto
-                      </Button>
-                    </div>
-                  ) : (
-                    <Button
-                      onClick={() => triggerFileInput(photoType.id)}
-                      className="w-full h-32 border-2 border-dashed border-gray-300 hover:border-gray-400"
-                      variant="ghost"
-                    >
-                      <div className="text-center">
-                        <Camera className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-                        <span className="text-sm text-gray-500">Tomar Foto</span>
-                      </div>
-                    </Button>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
+      <PhotoSection
+        title="Fotografías Recomendadas"
+        photos={requiredPhotos}
+        existingPhotos={inspection.photos}
+        onTakePhoto={triggerFileInput}
+        onRemovePhoto={handleRemovePhoto}
+      />
 
-      {/* Optional Photos */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Fotografías Opcionales</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {optionalPhotos.map((photoType) => {
-              const existingPhoto = getPhotoForType(photoType.id);
-              return (
-                <div key={photoType.id} className="border rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-medium">{photoType.name}</h3>
-                    <Badge variant="secondary" className="text-xs">Opcional</Badge>
-                  </div>
-                  
-                  {existingPhoto ? (
-                    <div className="space-y-3">
-                      <div className="relative">
-                        <img
-                          src={URL.createObjectURL(existingPhoto.file!)}
-                          alt={photoType.name}
-                          className="w-full h-32 object-cover rounded border"
-                        />
-                        <button
-                          onClick={() => handleRemovePhoto(existingPhoto.id)}
-                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </div>
-                      <Button
-                        variant="outline"
-                        onClick={() => triggerFileInput(photoType.id)}
-                        className="w-full"
-                      >
-                        <Upload className="h-4 w-4 mr-2" />
-                        Reemplazar Foto
-                      </Button>
-                    </div>
-                  ) : (
-                    <Button
-                      onClick={() => triggerFileInput(photoType.id)}
-                      className="w-full h-32 border-2 border-dashed border-gray-300 hover:border-gray-400"
-                      variant="ghost"
-                    >
-                      <div className="text-center">
-                        <Camera className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-                        <span className="text-sm text-gray-500">Tomar Foto</span>
-                      </div>
-                    </Button>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
+      <PhotoSection
+        title="Fotografías Opcionales"
+        photos={optionalPhotos}
+        existingPhotos={inspection.photos}
+        onTakePhoto={triggerFileInput}
+        onRemovePhoto={handleRemovePhoto}
+      />
 
-      {/* Hidden File Input */}
       <input
         ref={fileInputRef}
         type="file"
@@ -238,7 +99,6 @@ export default function PhotoCapture({ inspection, onUpdate, onNext, onPrevious 
         onChange={(e) => activePhotoType && handleFileSelect(e, activePhotoType)}
       />
 
-      {/* Navigation */}
       <div className="flex justify-between pt-6">
         <Button onClick={onPrevious} variant="outline" size="lg" className="flex items-center space-x-2">
           <ArrowLeft className="h-4 w-4" />
