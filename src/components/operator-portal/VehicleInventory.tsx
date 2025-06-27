@@ -35,9 +35,10 @@ export default function VehicleInventory({ inspection, onUpdate, onNext, onPrevi
     });
   };
 
-  const handleItemToggle = (itemId: string, checked: boolean) => {
+  const handleItemToggle = (itemId: string, checked: boolean | "indeterminate") => {
+    const isChecked = checked === true;
     const updatedItems = inspection.inspection_items.map(item =>
-      item.id === itemId ? { ...item, checked } : item
+      item.id === itemId ? { ...item, checked: isChecked } : item
     );
 
     onUpdate({
@@ -83,7 +84,7 @@ export default function VehicleInventory({ inspection, onUpdate, onNext, onPrevi
                   <Checkbox
                     id={item.id}
                     checked={item.checked}
-                    onCheckedChange={(checked) => handleItemToggle(item.id, checked as boolean)}
+                    onCheckedChange={(checked) => handleItemToggle(item.id, checked)}
                     className="h-4 w-4"
                   />
                   <Label
