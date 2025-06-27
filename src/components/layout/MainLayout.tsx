@@ -48,8 +48,8 @@ export default function MainLayout() {
         <div className="fixed inset-0 bg-black/50" onClick={() => setSidebarOpen(false)} />
         <div className="fixed left-0 top-0 h-full w-64 bg-gradient-green shadow-lg">
           <div className="flex items-center justify-between p-4 border-b border-green-darker/20">
-            <h2 className="text-xl font-bold text-white">TMS Grúas</h2>
-            <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(false)} className="text-white hover:bg-green-darker/20">
+            <h2 className="text-xl font-bold text-black">TMS Grúas</h2>
+            <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(false)} className="text-black hover:bg-green-darker/20">
               <X className="h-6 w-6" />
             </Button>
           </div>
@@ -63,8 +63,8 @@ export default function MainLayout() {
                   className={cn(
                     "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors mb-1",
                     location.pathname === item.href
-                      ? "bg-white/20 text-white backdrop-blur-sm"
-                      : "text-white/80 hover:bg-white/10 hover:text-white"
+                      ? "bg-white/20 text-black backdrop-blur-sm"
+                      : "text-black/80 hover:bg-white/10 hover:text-black"
                   )}
                   onClick={() => setSidebarOpen(false)}
                 >
@@ -80,7 +80,7 @@ export default function MainLayout() {
       {/* Desktop sidebar */}
       <div className="hidden lg:fixed lg:left-0 lg:top-0 lg:h-full lg:w-64 lg:bg-gradient-green lg:shadow-lg lg:block">
         <div className="p-6 border-b border-green-darker/20">
-          <h2 className="text-2xl font-bold text-white">TMS Grúas</h2>
+          <h2 className="text-2xl font-bold text-black">TMS Grúas</h2>
         </div>
         <nav className="p-4">
           {sidebarItems.map((item) => {
@@ -92,8 +92,8 @@ export default function MainLayout() {
                 className={cn(
                   "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors mb-1",
                   location.pathname === item.href
-                    ? "bg-white/20 text-white backdrop-blur-sm"
-                    : "text-white/80 hover:bg-white/10 hover:text-white"
+                    ? "bg-white/20 text-black backdrop-blur-sm"
+                    : "text-black/80 hover:bg-white/10 hover:text-black"
                 )}
               >
                 <Icon className="h-5 w-5" />
