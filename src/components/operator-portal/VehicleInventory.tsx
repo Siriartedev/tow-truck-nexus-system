@@ -6,15 +6,16 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { CheckSquare, Square, User } from 'lucide-react';
+import { CheckSquare, Square, User, ArrowRight, X } from 'lucide-react';
 import { ServiceInspection, InspectionItem } from '@/types/operator-portal';
 
 interface VehicleInventoryProps {
   inspection: ServiceInspection;
   onUpdate: (inspection: ServiceInspection) => void;
+  onNext: () => void;
 }
 
-export default function VehicleInventory({ inspection, onUpdate }: VehicleInventoryProps) {
+export default function VehicleInventory({ inspection, onUpdate, onNext }: VehicleInventoryProps) {
   const [allChecked, setAllChecked] = useState(false);
 
   const handleToggleAll = () => {
@@ -47,6 +48,14 @@ export default function VehicleInventory({ inspection, onUpdate }: VehicleInvent
     setAllChecked(allItemsChecked);
   };
 
+  const handleRemoveItem = (itemId: string) => {
+    const updatedItems = inspection.inspection_items.filter(item => item.id !== itemId);
+    onUpdate({
+      ...inspection,
+      inspection_items: updatedItems
+    });
+  };
+
   const handleObservationsChange = (observations: string) => {
     onUpdate({
       ...inspection,
@@ -70,11 +79,12 @@ export default function VehicleInventory({ inspection, onUpdate }: VehicleInvent
   }, {} as Record<string, InspectionItem[]>);
 
   const categoryNames = {
+    interior: 'Interior del Vehículo',
+    motor: 'Motor y Mecánica', 
     exterior: 'Exterior del Vehículo',
-    interior: 'Interior del Vehículo', 
-    engine: 'Motor y Mecánica',
-    safety: 'Elementos de Seguridad',
-    documentation: 'Documentación'
+    seguridad: 'Elementos de Seguridad',
+    herramientas: 'Herramientas',
+    otros: 'Otros Elementos'
   };
 
   const checkedCount = inspection.inspection_items.filter(item => item.checked).length;
@@ -82,7 +92,7 @@ export default function VehicleInventory({ inspection, onUpdate }: VehicleInvent
 
   return (
     <div className="space-y-6">
-      {/* Controls */}
+      {/* Progress Header */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -120,37 +130,53 @@ export default function VehicleInventory({ inspection, onUpdate }: VehicleInvent
         </CardContent>
       </Card>
 
-      {/* Inventory Items by Category */}
-      {Object.entries(groupedItems).map(([category, items]) => (
-        <Card key={category}>
-          <CardHeader>
-            <CardTitle className="text-lg">
-              {categoryNames[category as keyof typeof categoryNames]}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {items.map((item) => (
-                <div key={item.id} className="flex items-center space-x-2 p-2 rounded-lg hover:bg-accent">
-                  <Checkbox
-                    id={item.id}
-                    checked={item.checked}
-                    onCheckedChange={(checked) => handleItemToggle(item.id, checked as boolean)}
-                  />
-                  <Label
-                    htmlFor={item.id}
-                    className={`text-sm cursor-pointer flex-1 ${
-                      item.checked ? 'line-through text-muted-foreground' : ''
-                    }`}
-                  >
-                    {item.name}
-                  </Label>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+      {/* Inventory Items as Chips */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Elementos de Inspección</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Selecciona los elementos que están presentes en el vehículo. Puedes eliminar elementos que no aplican con la X.
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-2">
+            {inspection.inspection_items.map((item) => (
+              <div 
+                key={item.id} 
+                className={`
+                  flex items-center space-x-2 px-3 py-2 rounded-full border transition-all duration-200
+                  ${item.checked 
+                    ? 'bg-green-100 border-green-300 text-green-800' 
+                    : 'bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100'
+                  }
+                `}
+              >
+                <Checkbox
+                  id={item.id}
+                  checked={item.checked}
+                  onCheckedChange={(checked) => handleItemToggle(item.id, checked as boolean)}
+                  className="h-4 w-4"
+                />
+                <Label
+                  htmlFor={item.id}
+                  className={`text-sm cursor-pointer select-none ${
+                    item.checked ? 'font-medium' : ''
+                  }`}
+                >
+                  {item.name}
+                </Label>
+                <button
+                  onClick={() => handleRemoveItem(item.id)}
+                  className="text-gray-400 hover:text-red-500 transition-colors ml-1"
+                  type="button"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Client Information */}
       <Card>
@@ -187,6 +213,14 @@ export default function VehicleInventory({ inspection, onUpdate }: VehicleInvent
           />
         </CardContent>
       </Card>
+
+      {/* Navigation */}
+      <div className="flex justify-end pt-6">
+        <Button onClick={onNext} size="lg" className="flex items-center space-x-2">
+          <span>Continuar a Fotografías</span>
+          <ArrowRight className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 }

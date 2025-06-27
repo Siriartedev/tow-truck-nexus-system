@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, FileText, Camera, PenTool, Save } from 'lucide-react';
+import { ArrowLeft, FileText, Camera, PenTool, Save, CheckCircle } from 'lucide-react';
 import { Service } from '@/types/services';
 import { OperatorAuth, ServiceInspection, DEFAULT_INSPECTION_ITEMS } from '@/types/operator-portal';
 import VehicleInventory from './VehicleInventory';
@@ -90,6 +90,28 @@ export default function ServiceInspectionForm({ service, operator, onBack }: Ser
     return hasMinimumPhotos && hasOperatorSignature && hasClientSignature;
   };
 
+  const getTabIcon = (tab: string) => {
+    switch (tab) {
+      case 'inventory': return <FileText className="h-4 w-4" />;
+      case 'photos': return <Camera className="h-4 w-4" />;
+      case 'signatures': return <PenTool className="h-4 w-4" />;
+      default: return null;
+    }
+  };
+
+  const getCompletionStatus = (tab: string) => {
+    switch (tab) {
+      case 'inventory':
+        return inspection.inspection_items.some(item => item.checked);
+      case 'photos':
+        return inspection.photos.length >= 1;
+      case 'signatures':
+        return inspection.signatures.operator && inspection.signatures.client;
+      default:
+        return false;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -138,24 +160,25 @@ export default function ServiceInspectionForm({ service, operator, onBack }: Ser
       <div className="p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-6">
-            <TabsTrigger value="inventory" className="flex items-center space-x-2">
-              <FileText className="h-4 w-4" />
-              <span>Inventario</span>
-            </TabsTrigger>
-            <TabsTrigger value="photos" className="flex items-center space-x-2">
-              <Camera className="h-4 w-4" />
-              <span>Fotografías</span>
-            </TabsTrigger>
-            <TabsTrigger value="signatures" className="flex items-center space-x-2">
-              <PenTool className="h-4 w-4" />
-              <span>Firmas</span>
-            </TabsTrigger>
+            {['inventory', 'photos', 'signatures'].map((tab) => (
+              <TabsTrigger key={tab} value={tab} className="flex items-center space-x-2 relative">
+                {getTabIcon(tab)}
+                <span className="capitalize">
+                  {tab === 'inventory' ? 'Inventario' : 
+                   tab === 'photos' ? 'Fotografías' : 'Firmas'}
+                </span>
+                {getCompletionStatus(tab) && (
+                  <CheckCircle className="h-3 w-3 text-green-600 absolute -top-1 -right-1" />
+                )}
+              </TabsTrigger>
+            ))}
           </TabsList>
 
           <TabsContent value="inventory">
             <VehicleInventory 
               inspection={inspection}
               onUpdate={setInspection}
+              onNext={() => setActiveTab('photos')}
             />
           </TabsContent>
 
@@ -163,6 +186,8 @@ export default function ServiceInspectionForm({ service, operator, onBack }: Ser
             <PhotoCapture 
               inspection={inspection}
               onUpdate={setInspection}
+              onNext={() => setActiveTab('signatures')}
+              onPrevious={() => setActiveTab('inventory')}
             />
           </TabsContent>
 
@@ -170,6 +195,7 @@ export default function ServiceInspectionForm({ service, operator, onBack }: Ser
             <DigitalSignatures 
               inspection={inspection}
               onUpdate={setInspection}
+              onPrevious={() => setActiveTab('photos')}
               operatorName={operator.name}
             />
           </TabsContent>
@@ -181,7 +207,11 @@ export default function ServiceInspectionForm({ service, operator, onBack }: Ser
             onClick={handleCompleteInspection}
             size="lg"
             disabled={!isFormValid()}
-            className="shadow-lg"
+            className={`shadow-lg ${
+              isFormValid() 
+                ? 'bg-green-600 hover:bg-green-700' 
+                : 'bg-gray-400 cursor-not-allowed'
+            }`}
           >
             <Save className="h-4 w-4 mr-2" />
             Completar Inspección
