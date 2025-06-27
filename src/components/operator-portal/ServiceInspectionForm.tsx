@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Service } from '@/types/services';
 import { OperatorAuth, ServiceInspection, DEFAULT_INSPECTION_ITEMS } from '@/types/operator-portal';
@@ -6,6 +5,7 @@ import InspectionHeader from './inspection/InspectionHeader';
 import ServiceDetails from './inspection/ServiceDetails';
 import InspectionTabs from './inspection/InspectionTabs';
 import { toast } from 'sonner';
+import { usePDFGenerator } from '@/hooks/usePDFGenerator';
 
 interface ServiceInspectionFormProps {
   service: Service;
@@ -29,6 +29,8 @@ export default function ServiceInspectionForm({ service, operator, onBack }: Ser
     },
     created_at: new Date().toISOString()
   });
+
+  const { generateServiceReport, generateCertificate } = usePDFGenerator();
 
   const handleCompleteInspection = async () => {
     const hasMinimumPhotos = inspection.photos.filter(p => p.file).length >= 1;
@@ -60,6 +62,17 @@ export default function ServiceInspectionForm({ service, operator, onBack }: Ser
       };
 
       console.log('Inspección completada:', updatedInspection);
+      
+      // Generate PDFs automatically
+      toast.info('Generando documentos del servicio...');
+      
+      // Generate service report
+      await generateServiceReport(service, updatedInspection);
+      
+      // Generate certificate if inspection is complete
+      if (updatedInspection.signatures.operator && updatedInspection.signatures.client) {
+        await generateCertificate(service, updatedInspection);
+      }
       
       toast.success('Inspección completada exitosamente. El servicio ahora está en progreso.');
       

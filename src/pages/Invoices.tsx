@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,6 +21,7 @@ import {
 } from 'lucide-react';
 import CreateInvoiceForm from '@/components/invoices/CreateInvoiceForm';
 import type { Invoice, CreateInvoiceData } from '@/types/invoices';
+import { usePDFGenerator } from '@/hooks/usePDFGenerator';
 
 export default function Invoices() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -100,6 +100,8 @@ export default function Invoices() {
     }
   };
 
+  const { generateInvoice } = usePDFGenerator();
+
   const handleCreateInvoice = (data: CreateInvoiceData) => {
     console.log('Creating invoice:', data);
     toast({
@@ -107,6 +109,10 @@ export default function Invoices() {
       description: "La factura ha sido creada exitosamente.",
     });
     setShowCreateForm(false);
+  };
+
+  const handleDownloadInvoice = async (invoice: Invoice) => {
+    await generateInvoice(invoice);
   };
 
   const filteredInvoices = invoices.filter(invoice => {
@@ -289,8 +295,13 @@ export default function Invoices() {
                     <Button size="sm" variant="outline" className="border-border">
                       <Eye className="h-4 w-4" />
                     </Button>
-                    <Button size="sm" variant="outline" className="border-border">
-                      <Edit className="h-4 w-4" />
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="border-border"
+                      onClick={() => handleDownloadInvoice(invoice)}
+                    >
+                      <FileText className="h-4 w-4" />
                     </Button>
                     <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700 border-border">
                       <Trash2 className="h-4 w-4" />

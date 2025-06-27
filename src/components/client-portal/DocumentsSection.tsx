@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,6 +14,7 @@ import {
   Eye
 } from 'lucide-react';
 import type { ClientDocument } from '@/types/client-portal';
+import { usePDFGenerator } from '@/hooks/usePDFGenerator';
 
 export default function DocumentsSection() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -71,6 +71,8 @@ export default function DocumentsSection() {
     }
   ];
 
+  const { generateInvoice, generateServiceReport } = usePDFGenerator();
+
   const getDocumentIcon = (type: string) => {
     switch (type) {
       case 'invoice': return FileText;
@@ -102,10 +104,72 @@ export default function DocumentsSection() {
     doc.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleDownload = (doc: ClientDocument) => {
-    // Simulate download
-    console.log('Downloading document:', doc.name);
-    // In production, this would handle the actual file download
+  const handleDownload = async (doc: ClientDocument) => {
+    try {
+      // Simulate document generation based on type
+      if (doc.type === 'invoice') {
+        // Mock invoice data for demonstration
+        const mockInvoice = {
+          id: doc.id,
+          folio: doc.name.split(' ')[1] || 'INV-001',
+          closure_id: '1',
+          closure_folio: 'CIE-001',
+          client_id: '1',
+          client_name: 'Cliente Demo',
+          issue_date: new Date().toISOString().split('T')[0],
+          due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          subtotal: 100000,
+          tax_rate: 16,
+          tax_amount: 16000,
+          total_amount: 116000,
+          status: 'sent' as const,
+          created_at: doc.created_at,
+          updated_at: doc.created_at
+        };
+        await generateInvoice(mockInvoice);
+      } else if (doc.type === 'report') {
+        // Mock service data for demonstration
+        const mockService = {
+          id: doc.service_id || '1',
+          folio: 'SRV-001',
+          client_id: '1',
+          client_name: 'Cliente Demo',
+          service_type_id: '1',
+          service_type_name: 'Traslado de Vehículo',
+          crane_id: '1',
+          crane_name: 'Grúa Mercedes-Benz',
+          operator_id: '1',
+          operator_name: 'Juan Pérez',
+          request_date: new Date().toISOString().split('T')[0],
+          service_date: new Date().toISOString().split('T')[0],
+          pickup_location: 'Ubicación de origen',
+          delivery_location: 'Ubicación de destino',
+          vehicle_brand: 'Toyota',
+          vehicle_model: 'Corolla',
+          license_plate: 'ABC-123',
+          service_value: 100000,
+          operator_commission: 20000,
+          status: 'completed' as const,
+          observations: 'Servicio completado satisfactoriamente',
+          created_at: doc.created_at,
+          updated_at: doc.created_at
+        };
+        await generateServiceReport(mockService);
+      } else {
+        // For other document types, show a message
+        toast({
+          title: "Funcionalidad en desarrollo",
+          description: "La descarga de este tipo de documento estará disponible pronto.",
+        });
+      }
+    } catch (error) {
+      console.error('Error downloading document:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo descargar el documento. Intente nuevamente.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
