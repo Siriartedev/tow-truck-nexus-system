@@ -80,11 +80,6 @@ export default function UserMenu() {
             <p className="text-xs leading-none text-muted-foreground">
               {profile.email}
             </p>
-            {profile.company_name && (
-              <p className="text-xs leading-none text-muted-foreground">
-                {profile.company_name}
-              </p>
-            )}
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
