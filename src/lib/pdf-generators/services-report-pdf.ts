@@ -62,12 +62,12 @@ export function generateServicesReportPDF(
   pdf.addText('DETALLE DE SERVICIOS', { bold: true, size: 14 });
   pdf.addText('');
   
-  const serviceHeaders = ['Folio', 'Cliente', 'Fecha', 'Tipo', 'Operador', 'Estado', 'Monto'];
+  const serviceHeaders = ['Folio', 'Fecha', 'Tipo', 'Vehículo', 'Operador', 'Estado', 'Monto'];
   const serviceRows = services.map(service => [
     service.folio,
-    service.client_name,
     new Date(service.service_date).toLocaleDateString('es-ES'),
     service.service_type,
+    `${service.vehicle_brand} ${service.vehicle_model} - ${service.license_plate}`,
     service.operator_name,
     service.status === 'completed' ? 'Completado' : 
     service.status === 'in_progress' ? 'En Progreso' : 

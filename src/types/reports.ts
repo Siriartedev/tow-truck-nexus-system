@@ -4,9 +4,9 @@ export interface ServiceReportItem {
   folio: string;
   client_name: string;
   service_type: string;
-  crane_brand: string;
-  crane_model: string;
-  crane_license_plate: string;
+  vehicle_brand: string;
+  vehicle_model: string;
+  license_plate: string;
   origin: string;
   destination: string;
   observations?: string;
