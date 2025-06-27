@@ -14,7 +14,7 @@ interface ServiceInspectionFormProps {
 }
 
 export default function ServiceInspectionForm({ service, operator, onBack }: ServiceInspectionFormProps) {
-  const [activeTab, setActiveTab] = useState('inventory');
+  const [activeTab, setActiveTab] = useState<string>('inventory');
   const [inspection, setInspection] = useState<ServiceInspection>({
     id: crypto.randomUUID(),
     service_id: service.id,
@@ -70,10 +70,10 @@ export default function ServiceInspectionForm({ service, operator, onBack }: Ser
     }
   };
 
-  const isFormValid = () => {
+  const isFormValid = (): boolean => {
     const hasMinimumPhotos = inspection.photos.filter(p => p.file).length >= 1;
-    const hasOperatorSignature = inspection.signatures.operator;
-    const hasClientSignature = inspection.signatures.client;
+    const hasOperatorSignature = !!inspection.signatures.operator;
+    const hasClientSignature = !!inspection.signatures.client;
     
     return hasMinimumPhotos && hasOperatorSignature && hasClientSignature;
   };
