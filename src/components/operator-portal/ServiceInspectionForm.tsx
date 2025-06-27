@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Service } from '@/types/services';
 import { OperatorAuth, ServiceInspection, DEFAULT_INSPECTION_ITEMS } from '@/types/operator-portal';
@@ -45,7 +46,7 @@ export default function ServiceInspectionForm({ service, operator, onBack }: Ser
     created_at: new Date().toISOString()
   });
 
-  const { generateServiceReport, generateCertificate } = usePDFGenerator();
+  const { generateCertificate } = usePDFGenerator();
 
   const handleCompleteInspection = async () => {
     const hasMinimumPhotos = inspection.photos.filter(p => p.file).length >= 1;
@@ -81,16 +82,9 @@ export default function ServiceInspectionForm({ service, operator, onBack }: Ser
       // Obtener configuración de empresa
       const companyConfig = getCompanyConfig();
       
-      // Generate PDFs automatically with company config
-      toast.info('Generando documentos del servicio...');
-      
-      // Generate service report
-      await generateServiceReport(service, updatedInspection);
-      
       // Generate certificate with company config
-      if (updatedInspection.signatures.operator && updatedInspection.signatures.client) {
-        await generateCertificate(service, updatedInspection, companyConfig);
-      }
+      toast.info('Generando certificado de inspección...');
+      await generateCertificate(service, updatedInspection, companyConfig);
       
       toast.success('Inspección completada exitosamente. El servicio ahora está en progreso.');
       
