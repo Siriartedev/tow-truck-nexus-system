@@ -1,3 +1,4 @@
+
 import { PDFGenerator } from '../pdf-utils';
 import type { ClientReportData } from '@/types/reports';
 import type { CompanyConfig } from '@/types/configuration';
@@ -10,50 +11,23 @@ export function generateClientReportPDF(
   // Crear PDF con orientación horizontal para mejor visualización de columnas
   const pdf = new PDFGenerator({ orientation: 'landscape' });
   
-  // Header con datos de empresa
-  if (companyConfig.logo_url) {
-    try {
-      pdf.addImage(companyConfig.logo_url, 60, 40);
-    } catch (error) {
-      console.log('Logo no disponible');
-    }
-  }
-  
-  pdf.addText(companyConfig.name, { bold: true, size: 16 });
-  pdf.addText(`RUT: ${companyConfig.rut}`, { size: 10 });
-  pdf.addText(companyConfig.address, { size: 10 });
-  pdf.addText(`Tel: ${companyConfig.phone} | Email: ${companyConfig.email}`, { size: 10 });
+  // Header compacto con datos de empresa en una sola línea
+  pdf.addText(companyConfig.name, { bold: true, size: 14 });
+  pdf.addText(`RUT: ${companyConfig.rut} | ${companyConfig.address} | Tel: ${companyConfig.phone}`, { size: 9 });
   pdf.addText('');
   
-  // Título
-  pdf.addText('REPORTE POR CLIENTE', { bold: true, size: 18 });
+  // Título y información del reporte en formato compacto
+  pdf.addText('REPORTE POR CLIENTE', { bold: true, size: 16 });
+  const currentDate = new Date();
+  pdf.addText(`Generado: ${currentDate.toLocaleDateString('es-ES')} | Período: ${new Date(filters.date_from).toLocaleDateString('es-ES')} - ${new Date(filters.date_to).toLocaleDateString('es-ES')}`, { size: 10 });
+  pdf.addText('');
+  
+  // Información del cliente en formato horizontal compacto
+  pdf.addText(`Cliente: ${reportData.client_name} | Servicios: ${reportData.total_services} | Total: $${reportData.total_amount.toLocaleString()} | Promedio: $${Math.round(reportData.total_amount / reportData.total_services).toLocaleString()}`, { size: 11, bold: true });
   pdf.addText('');
   pdf.addHorizontalLine();
   
-  // Información del reporte
-  const currentDate = new Date();
-  pdf.addText(`Fecha de generación: ${currentDate.toLocaleString('es-ES')}`, { size: 12 });
-  pdf.addText(`Período: ${new Date(filters.date_from).toLocaleDateString('es-ES')} - ${new Date(filters.date_to).toLocaleDateString('es-ES')}`, { size: 12 });
-  pdf.addText('');
-  
-  // Información del cliente
-  pdf.addText('INFORMACIÓN DEL CLIENTE', { bold: true, size: 14 });
-  pdf.addText('');
-  
-  const clientInfoTable = [
-    ['Cliente:', reportData.client_name],
-    ['Total de Servicios:', reportData.total_services.toString()],
-    ['Valor Total:', `$${reportData.total_amount.toLocaleString()}`],
-    ['Valor Promedio:', `$${Math.round(reportData.total_amount / reportData.total_services).toLocaleString()}`]
-  ];
-  
-  pdf.addTable(['Campo', 'Valor'], clientInfoTable);
-  pdf.addText('');
-  
-  // Detalle de servicios
-  pdf.addText('DETALLE DE SERVICIOS', { bold: true, size: 14 });
-  pdf.addText('');
-  
+  // Detalle de servicios con tabla optimizada
   const serviceHeaders = ['Folio', 'Fecha', 'Tipo', 'Marca', 'Modelo', 'Patente', 'Origen', 'Destino', 'Valor', 'Estado'];
   const serviceRows = reportData.services.map(service => [
     service.folio,
@@ -72,10 +46,9 @@ export function generateClientReportPDF(
   
   pdf.addTable(serviceHeaders, serviceRows);
   
-  // Footer
+  // Footer compacto
   pdf.addText('');
-  pdf.addText(`${companyConfig.name} - ${companyConfig.address}`, { size: 8 });
-  pdf.addText(`Tel: ${companyConfig.phone} | Email: ${companyConfig.email}`, { size: 8 });
+  pdf.addText(`${companyConfig.name} - ${companyConfig.phone} - ${companyConfig.email}`, { size: 8 });
   
   return pdf.getBlob();
 }
