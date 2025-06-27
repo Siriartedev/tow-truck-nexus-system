@@ -6,16 +6,17 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { CheckSquare, Square, User, ArrowRight, X } from 'lucide-react';
+import { CheckSquare, Square, User, ArrowRight, ArrowLeft, X } from 'lucide-react';
 import { ServiceInspection, InspectionItem } from '@/types/operator-portal';
 
 interface VehicleInventoryProps {
   inspection: ServiceInspection;
   onUpdate: (inspection: ServiceInspection) => void;
   onNext: () => void;
+  onPrevious?: () => void;
 }
 
-export default function VehicleInventory({ inspection, onUpdate, onNext }: VehicleInventoryProps) {
+export default function VehicleInventory({ inspection, onUpdate, onNext, onPrevious }: VehicleInventoryProps) {
   const [allChecked, setAllChecked] = useState(false);
 
   const handleToggleAll = () => {
@@ -130,45 +131,42 @@ export default function VehicleInventory({ inspection, onUpdate, onNext }: Vehic
         </CardContent>
       </Card>
 
-      {/* Inventory Items as Chips */}
+      {/* Inventory Items as List */}
       <Card>
         <CardHeader>
           <CardTitle>Elementos de Inspección</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Selecciona los elementos que están presentes en el vehículo. Puedes eliminar elementos que no aplican con la X.
+            Selecciona los elementos que están presentes en el vehículo. Puedes eliminar elementos que no aplican.
           </p>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {inspection.inspection_items.map((item) => (
               <div 
                 key={item.id} 
-                className={`
-                  flex items-center space-x-2 px-3 py-2 rounded-full border transition-all duration-200
-                  ${item.checked 
-                    ? 'bg-green-100 border-green-300 text-green-800' 
-                    : 'bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100'
-                  }
-                `}
+                className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors"
               >
-                <Checkbox
-                  id={item.id}
-                  checked={item.checked}
-                  onCheckedChange={(checked) => handleItemToggle(item.id, checked as boolean)}
-                  className="h-4 w-4"
-                />
-                <Label
-                  htmlFor={item.id}
-                  className={`text-sm cursor-pointer select-none ${
-                    item.checked ? 'font-medium' : ''
-                  }`}
-                >
-                  {item.name}
-                </Label>
+                <div className="flex items-center space-x-3 flex-1">
+                  <Checkbox
+                    id={item.id}
+                    checked={item.checked}
+                    onCheckedChange={(checked) => handleItemToggle(item.id, checked as boolean)}
+                    className="h-4 w-4"
+                  />
+                  <Label
+                    htmlFor={item.id}
+                    className={`text-sm cursor-pointer select-none flex-1 ${
+                      item.checked ? 'font-medium text-green-800' : 'text-gray-700'
+                    }`}
+                  >
+                    {item.name}
+                  </Label>
+                </div>
                 <button
                   onClick={() => handleRemoveItem(item.id)}
-                  className="text-gray-400 hover:text-red-500 transition-colors ml-1"
+                  className="text-gray-400 hover:text-red-500 transition-colors p-1"
                   type="button"
+                  title="Eliminar elemento"
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -215,8 +213,17 @@ export default function VehicleInventory({ inspection, onUpdate, onNext }: Vehic
       </Card>
 
       {/* Navigation */}
-      <div className="flex justify-end pt-6">
-        <Button onClick={onNext} size="lg" className="flex items-center space-x-2">
+      <div className="flex justify-between items-center pt-6">
+        {onPrevious ? (
+          <Button onClick={onPrevious} variant="outline" size="lg" className="flex items-center space-x-2">
+            <ArrowLeft className="h-4 w-4" />
+            <span>Anterior</span>
+          </Button>
+        ) : (
+          <div></div>
+        )}
+        
+        <Button onClick={onNext} size="lg" className="flex items-center space-x-2 bg-green-600 hover:bg-green-700">
           <span>Continuar a Fotografías</span>
           <ArrowRight className="h-4 w-4" />
         </Button>
