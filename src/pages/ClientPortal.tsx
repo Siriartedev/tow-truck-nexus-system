@@ -8,8 +8,6 @@ import {
   FileText, 
   Plus, 
   Clock, 
-  Download,
-  Camera,
   ArrowLeft
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -17,8 +15,6 @@ import ClientDashboard from '@/components/client-portal/ClientDashboard';
 import ServiceHistory from '@/components/client-portal/ServiceHistory';
 import ServiceRequest from '@/components/client-portal/ServiceRequest';
 import ActiveServices from '@/components/client-portal/ActiveServices';
-import DocumentsSection from '@/components/client-portal/DocumentsSection';
-import InspectionsSection from '@/components/client-portal/InspectionsSection';
 
 export default function ClientPortal() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -46,7 +42,7 @@ export default function ClientPortal() {
       {/* Main Content */}
       <div className="p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6 mb-8">
+          <TabsList className="grid w-full grid-cols-4 mb-8">
             <TabsTrigger value="dashboard" className="flex items-center space-x-2">
               <Home className="h-4 w-4" />
               <span>Dashboard</span>
@@ -62,14 +58,6 @@ export default function ClientPortal() {
             <TabsTrigger value="active" className="flex items-center space-x-2">
               <Clock className="h-4 w-4" />
               <span>Activos</span>
-            </TabsTrigger>
-            <TabsTrigger value="documents" className="flex items-center space-x-2">
-              <Download className="h-4 w-4" />
-              <span>Documentos</span>
-            </TabsTrigger>
-            <TabsTrigger value="inspections" className="flex items-center space-x-2">
-              <Camera className="h-4 w-4" />
-              <span>Inspecciones</span>
             </TabsTrigger>
           </TabsList>
 
@@ -87,14 +75,6 @@ export default function ClientPortal() {
 
           <TabsContent value="active">
             <ActiveServices />
-          </TabsContent>
-
-          <TabsContent value="documents">
-            <DocumentsSection />
-          </TabsContent>
-
-          <TabsContent value="inspections">
-            <InspectionsSection />
           </TabsContent>
         </Tabs>
       </div>
