@@ -19,7 +19,6 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signUp: (email: string, password: string, userData?: any) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   isAdmin: boolean;
   isClient: boolean;
@@ -36,7 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchUserProfile = async (userId: string) => {
     try {
-      console.log('Fetching profile for user:', userId);
+      console.log('Obteniendo perfil para usuario:', userId);
       
       const { data: profileData, error } = await supabase
         .from('user_profiles')
@@ -45,14 +44,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single();
       
       if (error) {
-        console.error('Error fetching profile:', error);
+        console.error('Error obteniendo perfil:', error);
         return null;
       }
 
-      console.log('Profile found:', profileData);
+      console.log('Perfil encontrado:', profileData);
       return profileData;
     } catch (err) {
-      console.error('Profile fetch error:', err);
+      console.error('Error en fetchUserProfile:', err);
       return null;
     }
   };
@@ -60,7 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.email);
+        console.log('Estado de auth cambió:', event, session?.user?.email);
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -75,8 +74,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     );
 
+    // Verificar sesión inicial
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session:', session?.user?.email);
+      console.log('Sesión inicial:', session?.user?.email);
       
       if (session?.user) {
         setSession(session);
@@ -96,7 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
-      console.log('Signing in:', email);
+      console.log('Iniciando sesión:', email);
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -104,47 +104,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       
       if (error) {
-        console.error('Sign in error:', error);
-        toast.error('Error al iniciar sesión: ' + error.message);
-      } else {
-        console.log('Sign in successful');
-        toast.success('Sesión iniciada');
+        console.error('Error de inicio de sesión:', error);
+        toast.error(`Error: ${error.message}`);
+        return { error };
       }
-      
-      return { error };
-    } catch (err) {
-      console.error('Sign in error:', err);
-      toast.error('Error de conexión');
-      return { error: err };
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const signUp = async (email: string, password: string, userData: any = {}) => {
-    try {
-      setLoading(true);
-      console.log('Signing up:', email, userData);
-      
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: userData
-        }
-      });
-      
-      if (error) {
-        console.error('Sign up error:', error);
-        toast.error('Error al registrarse: ' + error.message);
-      } else {
-        console.log('Sign up successful');
-        toast.success('Usuario registrado');
+      if (data.user) {
+        console.log('Inicio de sesión exitoso:', data.user.email);
+        toast.success('¡Sesión iniciada correctamente!');
+        return { error: null };
       }
       
       return { error };
     } catch (err) {
-      console.error('Sign up error:', err);
+      console.error('Error en signIn:', err);
       toast.error('Error de conexión');
       return { error: err };
     } finally {
@@ -154,18 +127,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
+      console.log('Cerrando sesión...');
+      
+      // Limpiar estado primero
       setUser(null);
       setProfile(null);
       setSession(null);
       
       const { error } = await supabase.auth.signOut();
       if (error) {
-        console.error('Sign out error:', error);
+        console.error('Error al cerrar sesión:', error);
+        toast.error('Error al cerrar sesión');
       } else {
+        console.log('Sesión cerrada correctamente');
         toast.success('Sesión cerrada');
       }
     } catch (err) {
-      console.error('Sign out error:', err);
+      console.error('Error en signOut:', err);
+      toast.error('Error al cerrar sesión');
     }
   };
 
@@ -175,7 +154,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     session,
     loading,
     signIn,
-    signUp,
     signOut,
     isAdmin: profile?.role === 'admin',
     isClient: profile?.role === 'client',
@@ -192,7 +170,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error('useAuth debe usarse dentro de un AuthProvider');
   }
   return context;
 }

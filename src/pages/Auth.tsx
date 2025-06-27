@@ -10,21 +10,21 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
 const demoAccounts = [
-  { email: 'admin@demo.com', password: 'admin123', role: 'admin', name: 'Admin Demo' },
-  { email: 'cliente@demo.com', password: 'cliente123', role: 'client', name: 'Cliente Demo' },
-  { email: 'operador@demo.com', password: 'operador123', role: 'operator', name: 'Operador Demo' }
+  { email: 'admin@demo.com', password: 'admin123', role: 'admin' },
+  { email: 'cliente@demo.com', password: 'cliente123', role: 'client' },
+  { email: 'operador@demo.com', password: 'operador123', role: 'operator' }
 ];
 
 export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn, signUp, user, profile } = useAuth();
+  const { signIn, user, profile } = useAuth();
   const navigate = useNavigate();
   
   useEffect(() => {
     if (user && profile) {
-      console.log('User logged in, redirecting...', profile.role);
+      console.log('Usuario logueado, redirigiendo...', profile.role);
       if (profile.role === 'admin') {
         navigate('/');
       } else if (profile.role === 'client') {
@@ -43,28 +43,13 @@ export default function Auth() {
     }
     
     setLoading(true);
+    console.log('Intentando login con:', email);
+    
     const { error } = await signIn(email, password);
     
     if (error) {
-      // Si falla el login, intentar crear el usuario
-      const demoAccount = demoAccounts.find(acc => acc.email === email && acc.password === password);
-      if (demoAccount) {
-        console.log('Creating demo account:', demoAccount.email);
-        const { error: signUpError } = await signUp(email, password, {
-          name: demoAccount.name,
-          role: demoAccount.role
-        });
-        
-        if (!signUpError) {
-          toast.success('Usuario creado. Iniciando sesión...');
-          // Intentar login nuevamente
-          setTimeout(async () => {
-            await signIn(email, password);
-          }, 1000);
-        }
-      } else {
-        toast.error('Credenciales incorrectas');
-      }
+      console.error('Error de login:', error);
+      toast.error('Error al iniciar sesión. Verifica tus credenciales.');
     }
     
     setLoading(false);
@@ -75,24 +60,13 @@ export default function Auth() {
     setPassword(demoPassword);
     
     setLoading(true);
+    console.log('Login demo con:', demoEmail);
+    
     const { error } = await signIn(demoEmail, demoPassword);
     
     if (error) {
-      const demoAccount = demoAccounts.find(acc => acc.email === demoEmail);
-      if (demoAccount) {
-        console.log('Creating demo account:', demoAccount.email);
-        const { error: signUpError } = await signUp(demoEmail, demoPassword, {
-          name: demoAccount.name,
-          role: demoAccount.role
-        });
-        
-        if (!signUpError) {
-          toast.success('Usuario demo creado');
-          setTimeout(async () => {
-            await signIn(demoEmail, demoPassword);
-          }, 1000);
-        }
-      }
+      console.error('Error en demo login:', error);
+      toast.error('Error al acceder con cuenta demo');
     }
     
     setLoading(false);
@@ -106,6 +80,7 @@ export default function Auth() {
             <Truck className="h-8 w-8 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-green-dark">TMS Grúas</h1>
+          <p className="text-green-dark/70">Sistema de Gestión de Transporte</p>
         </div>
 
         <Card className="shadow-lg mb-6">
@@ -122,6 +97,7 @@ export default function Auth() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={loading}
+                  placeholder="ejemplo@correo.com"
                   required
                 />
               </div>
@@ -133,6 +109,7 @@ export default function Auth() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={loading}
+                  placeholder="Tu contraseña"
                   required
                 />
               </div>
@@ -145,7 +122,7 @@ export default function Auth() {
 
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle className="text-center text-sm">Cuentas Demo</CardTitle>
+            <CardTitle className="text-center text-sm">Acceso Rápido - Cuentas Demo</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             {demoAccounts.map((account) => (
@@ -158,13 +135,25 @@ export default function Auth() {
                 disabled={loading}
               >
                 <LogIn className="h-4 w-4 mr-2" />
-                {account.name} ({account.role})
+                <div className="text-left">
+                  <div className="font-medium">
+                    {account.role === 'admin' ? 'Administrador' : 
+                     account.role === 'client' ? 'Cliente' : 'Operador'}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {account.email}
+                  </div>
+                </div>
               </Button>
             ))}
-            <div className="text-xs text-muted-foreground mt-2">
-              <p>admin@demo.com / admin123</p>
-              <p>cliente@demo.com / cliente123</p>
-              <p>operador@demo.com / operador123</p>
+            
+            <div className="text-xs text-muted-foreground mt-4 p-3 bg-blue-50 rounded-lg border">
+              <p className="font-medium mb-2">Credenciales para pruebas:</p>
+              <div className="space-y-1">
+                <p><strong>Admin:</strong> admin@demo.com / admin123</p>
+                <p><strong>Cliente:</strong> cliente@demo.com / cliente123</p>
+                <p><strong>Operador:</strong> operador@demo.com / operador123</p>
+              </div>
             </div>
           </CardContent>
         </Card>
