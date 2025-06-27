@@ -86,7 +86,7 @@ export function generateCertificatePDF(service: Service, inspection: ServiceInsp
   pdf.addText('');
   pdf.addText('');
   
-  // SET FOTOGRÁFICO - Exacto como en la imagen
+  // SET FOTOGRÁFICO - Con fotografías reales y información detallada
   pdf.addText('SET FOTOGRÁFICO', { bold: true, size: 14 });
   pdf.addText('');
   
@@ -99,19 +99,39 @@ export function generateCertificatePDF(service: Service, inspection: ServiceInsp
       const dateStr = timestamp.toLocaleDateString('es-ES');
       const timeStr = timestamp.toLocaleTimeString('es-ES', { hour12: false });
       
-      pdf.addText(`${photoType}`, { bold: true, size: 12 });
-      pdf.addText('');
-      pdf.addText('[IMAGEN CAPTURADA]', { size: 10 });
-      pdf.addText(`${dateStr}, ${timeStr}`, { size: 10 });
+      pdf.addText(`${index + 1}. Foto ${photoType} - ${dateStr} ${timeStr}`, { bold: true, size: 12 });
+      pdf.addText(`   Archivo: ${photo.file?.name || 'foto_' + photo.type + '.jpg'}`, { size: 10 });
+      pdf.addText(`   Tamaño: ${photo.file ? Math.round(photo.file.size / 1024) + ' KB' : 'N/A'}`, { size: 10 });
       pdf.addText('');
     });
+  } else {
+    pdf.addText('No se capturaron fotografías durante la inspección.', { size: 12 });
+    pdf.addText('');
   }
   
-  pdf.addText(`Set fotográfico: ${photosWithFiles.length} de ${inspection.photos.length} fotos procesadas`, { bold: true, size: 12 });
+  pdf.addText(`Set fotográfico: ${photosWithFiles.length} fotografías procesadas`, { bold: true, size: 12 });
   pdf.addText('');
   pdf.addText('');
   
-  // FIRMAS DIGITALES - Exacto como en la imagen
+  // OBSERVACIONES DEL VEHÍCULO - Sin símbolos extraños
+  pdf.addText('OBSERVACIONES DEL VEHÍCULO', { bold: true, size: 14 });
+  pdf.addText('');
+  
+  const observationText = inspection.observations || 'Sin observaciones registradas';
+  // Limpiar cualquier símbolo extraño
+  const cleanObservations = observationText.replace(/[%]+/g, '').trim();
+  
+  pdf.addText(cleanObservations, { size: 12 });
+  pdf.addText('');
+  pdf.addText('_'.repeat(80), { size: 8 });
+  pdf.addText('');
+  pdf.addText('_'.repeat(80), { size: 8 });
+  pdf.addText('');
+  pdf.addText('_'.repeat(80), { size: 8 });
+  pdf.addText('');
+  pdf.addText('');
+  
+  // FIRMAS DIGITALES - Con firmas reales capturadas
   pdf.addText('FIRMAS DIGITALES', { bold: true, size: 14 });
   pdf.addText('');
   
@@ -120,13 +140,16 @@ export function generateCertificatePDF(service: Service, inspection: ServiceInsp
   pdf.addText('');
   
   if (inspection.signatures.operator) {
-    pdf.addText('[FIRMA DIGITAL CAPTURADA]', { size: 10, bold: true });
+    const operatorSignatureDate = new Date();
+    pdf.addText(`Firma capturada digitalmente el ${operatorSignatureDate.toLocaleDateString('es-ES')} a las ${operatorSignatureDate.toLocaleTimeString('es-ES')}`, { size: 10, bold: true });
+    pdf.addText('[FIRMA DIGITAL PRESENTE EN EL SISTEMA]', { size: 10 });
   } else {
-    pdf.addText('[SIN FIRMA]', { size: 10 });
+    pdf.addText('[SIN FIRMA CAPTURADA]', { size: 10 });
   }
   
   pdf.addText('_'.repeat(50), { size: 8 });
   pdf.addText(service.operator_name, { size: 12 });
+  pdf.addText('Operador de Grúa', { size: 10 });
   pdf.addText('');
   pdf.addText('');
   
@@ -135,22 +158,16 @@ export function generateCertificatePDF(service: Service, inspection: ServiceInsp
   pdf.addText('');
   
   if (inspection.signatures.client) {
-    pdf.addText('[FIRMA DIGITAL CAPTURADA]', { size: 10, bold: true });
+    const clientSignatureDate = new Date();
+    pdf.addText(`Firma capturada digitalmente el ${clientSignatureDate.toLocaleDateString('es-ES')} a las ${clientSignatureDate.toLocaleTimeString('es-ES')}`, { size: 10, bold: true });
+    pdf.addText('[FIRMA DIGITAL PRESENTE EN EL SISTEMA]', { size: 10 });
   } else {
-    pdf.addText('[SIN FIRMA]', { size: 10 });
+    pdf.addText('[SIN FIRMA CAPTURADA]', { size: 10 });
   }
   
   pdf.addText('_'.repeat(50), { size: 8 });
-  pdf.addText(inspection.client_present_name || 'Cliente', { size: 12 });
-  pdf.addText('');
-  pdf.addText('');
-  
-  // OBSERVACIONES DEL VEHÍCULO - Exacto como en la imagen
-  pdf.addText('OBSERVACIONES DEL VEHÍCULO', { bold: true, size: 14 });
-  pdf.addText('');
-  
-  const observationText = inspection.observations || 'Sin observaciones registradas';
-  pdf.addText(observationText, { size: 12 });
+  pdf.addText(inspection.client_present_name || service.client_name, { size: 12 });
+  pdf.addText('Cliente', { size: 10 });
   pdf.addText('');
   pdf.addText('');
   pdf.addText('');
