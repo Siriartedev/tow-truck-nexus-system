@@ -54,17 +54,20 @@ export function generateClientReportPDF(
   pdf.addText('DETALLE DE SERVICIOS', { bold: true, size: 14 });
   pdf.addText('');
   
-  const serviceHeaders = ['Folio', 'Fecha', 'Tipo', 'Vehículo', 'Operador', 'Estado', 'Monto'];
+  const serviceHeaders = ['Folio', 'Fecha', 'Tipo', 'Marca', 'Modelo', 'Patente', 'Origen', 'Destino', 'Valor', 'Estado'];
   const serviceRows = reportData.services.map(service => [
     service.folio,
     new Date(service.service_date).toLocaleDateString('es-ES'),
     service.service_type,
-    `${service.vehicle_brand} ${service.vehicle_model} - ${service.license_plate}`,
-    service.operator_name,
+    service.vehicle_brand,
+    service.vehicle_model,
+    service.license_plate,
+    service.origin,
+    service.destination,
+    `$${service.amount.toLocaleString()}`,
     service.status === 'completed' ? 'Completado' : 
     service.status === 'in_progress' ? 'En Progreso' : 
-    service.status === 'pending' ? 'Pendiente' : 'Cancelado',
-    `$${service.amount.toLocaleString()}`
+    service.status === 'pending' ? 'Pendiente' : 'Cancelado'
   ]);
   
   pdf.addTable(serviceHeaders, serviceRows);

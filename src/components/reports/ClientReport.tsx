@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -331,15 +330,13 @@ export default function ClientReport() {
                       <TableHead>Folio</TableHead>
                       <TableHead>Fecha</TableHead>
                       <TableHead>Tipo</TableHead>
-                      <TableHead>Vehículo</TableHead>
-                      <TableHead>Marca/Modelo</TableHead>
+                      <TableHead>Marca</TableHead>
+                      <TableHead>Modelo</TableHead>
                       <TableHead>Patente</TableHead>
                       <TableHead>Origen</TableHead>
                       <TableHead>Destino</TableHead>
-                      <TableHead>Operador</TableHead>
+                      <TableHead className="text-right">Valor</TableHead>
                       <TableHead>Estado</TableHead>
-                      <TableHead className="text-right">Monto</TableHead>
-                      <TableHead>Observaciones</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -357,14 +354,10 @@ export default function ClientReport() {
                         <TableCell className="max-w-32 truncate" title={service.destination}>
                           {service.destination}
                         </TableCell>
-                        <TableCell>{service.operator_name}</TableCell>
-                        <TableCell>{getStatusBadge(service.status)}</TableCell>
                         <TableCell className="text-right font-medium">
                           ${service.amount.toLocaleString()}
                         </TableCell>
-                        <TableCell className="max-w-40 truncate" title={service.observations}>
-                          {service.observations}
-                        </TableCell>
+                        <TableCell>{getStatusBadge(service.status)}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
