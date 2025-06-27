@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Truck, LogIn, UserPlus, ArrowLeft } from 'lucide-react';
+import { Truck, LogIn, UserPlus, ArrowLeft, Building, User as UserIcon } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Link } from 'react-router-dom';
 
@@ -17,11 +17,24 @@ export default function Auth() {
   const [name, setName] = useState('');
   const [role, setRole] = useState<'client' | 'operator'>('client');
   const [loading, setLoading] = useState(false);
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, user, profile } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
   const from = location.state?.from?.pathname || '/';
+
+  // Redireccionar automáticamente según el rol después del login
+  useEffect(() => {
+    if (user && profile) {
+      if (profile.role === 'admin') {
+        navigate('/');
+      } else if (profile.role === 'client') {
+        navigate('/portal-client');
+      } else if (profile.role === 'operator') {
+        navigate('/portal-operator');
+      }
+    }
+  }, [user, profile, navigate]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,7 +44,7 @@ export default function Auth() {
     const { error } = await signIn(email, password);
     
     if (!error) {
-      navigate(from, { replace: true });
+      // La redirección se maneja en el useEffect
     }
     setLoading(false);
   };
@@ -47,8 +60,15 @@ export default function Auth() {
     });
     
     if (!error) {
-      navigate(from, { replace: true });
+      // La redirección se maneja en el useEffect
     }
+    setLoading(false);
+  };
+
+  // Quick login functions for demo accounts
+  const quickLogin = async (demoEmail: string, demoPassword: string) => {
+    setLoading(true);
+    await signIn(demoEmail, demoPassword);
     setLoading(false);
   };
 
@@ -127,18 +147,45 @@ export default function Auth() {
                   </Button>
                 </form>
                 
-                <div className="mt-6 p-4 bg-green-50 rounded-lg">
-                  <h3 className="font-semibold text-green-dark mb-2">Cuentas de prueba:</h3>
-                  <div className="space-y-2 text-sm">
-                    <div>
-                      <strong>Admin:</strong> admin@gruas.com / admin123
-                    </div>
-                    <div>
-                      <strong>Cliente:</strong> cliente@empresa.com / cliente123
-                    </div>
-                    <div>
-                      <strong>Operador:</strong> operador@gruas.com / operador123
-                    </div>
+                {/* Accesos Rápidos para Demo */}
+                <div className="mt-6 space-y-4">
+                  <div className="text-center">
+                    <p className="text-sm font-medium text-gray-700 mb-3">Acceso Rápido - Cuentas Demo</p>
+                  </div>
+                  
+                  <div className="grid gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => quickLogin('admin@gruas.com', 'admin123')}
+                      disabled={loading}
+                      className="w-full justify-start"
+                    >
+                      <UserIcon className="h-4 w-4 mr-2" />
+                      <span className="flex-1 text-left">Administrador</span>
+                      <span className="text-xs text-muted-foreground">→ Panel Admin</span>
+                    </Button>
+                    
+                    <Button
+                      variant="outline"
+                      onClick={() => quickLogin('cliente@empresa.com', 'cliente123')}
+                      disabled={loading}
+                      className="w-full justify-start"
+                    >
+                      <Building className="h-4 w-4 mr-2" />
+                      <span className="flex-1 text-left">Cliente</span>
+                      <span className="text-xs text-muted-foreground">→ Portal Cliente</span>
+                    </Button>
+                    
+                    <Button
+                      variant="outline"
+                      onClick={() => quickLogin('operador@gruas.com', 'operador123')}
+                      disabled={loading}
+                      className="w-full justify-start"
+                    >
+                      <Truck className="h-4 w-4 mr-2" />
+                      <span className="flex-1 text-left">Operador</span>
+                      <span className="text-xs text-muted-foreground">→ Portal Operador</span>
+                    </Button>
                   </div>
                 </div>
               </TabsContent>

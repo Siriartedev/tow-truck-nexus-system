@@ -1,8 +1,7 @@
 
 import { useState } from 'react';
-import { Outlet, useNavigate, Link } from 'react-router-dom';
+import { Outlet, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { 
   LayoutDashboard, 
@@ -16,12 +15,9 @@ import {
   PieChart,
   Settings,
   Menu,
-  Building,
-  UserCheck,
-  LogOut
+  UserCheck
 } from 'lucide-react';
 import UserMenu from './UserMenu';
-import { useAuth } from '@/hooks/useAuth';
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -40,16 +36,6 @@ const navigation = [
 
 export default function MainLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const navigate = useNavigate();
-  const { user, profile, signOut } = useAuth();
-
-  const handlePortalAccess = () => {
-    if (profile?.role === 'client') {
-      navigate('/portal-client');
-    } else if (profile?.role === 'operator') {
-      navigate('/portal-operator');
-    }
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -83,28 +69,6 @@ export default function MainLayout() {
                     </li>
                   ))}
                 </ul>
-              </li>
-              <li className="mt-auto">
-                <div className="border-t border-border pt-4 space-y-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handlePortalAccess}
-                    className="w-full justify-start"
-                  >
-                    <Building className="h-4 w-4 mr-2" />
-                    Portal de {profile?.role === 'client' ? 'Cliente' : 'Operador'}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={signOut}
-                    className="w-full justify-start text-red-600 hover:text-red-700"
-                  >
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Cerrar Sesión
-                  </Button>
-                </div>
               </li>
             </ul>
           </nav>

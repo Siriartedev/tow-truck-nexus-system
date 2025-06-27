@@ -13,9 +13,11 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { User, Settings, LogOut, Shield, Building, Truck } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 export default function UserMenu() {
   const { user, profile, signOut, isAdmin, isClient, isOperator } = useAuth();
+  const navigate = useNavigate();
 
   if (!user || !profile) return null;
 
@@ -40,6 +42,14 @@ export default function UserMenu() {
     return 'Usuario';
   };
 
+  const handlePortalAccess = () => {
+    if (isClient) {
+      navigate('/portal-client');
+    } else if (isOperator) {
+      navigate('/portal-operator');
+    }
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -51,7 +61,11 @@ export default function UserMenu() {
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-64" align="end" forceMount>
+      <DropdownMenuContent 
+        className="w-64 z-[9999] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg" 
+        align="end" 
+        forceMount
+      >
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-2">
             <div className="flex items-center space-x-2">
@@ -74,6 +88,20 @@ export default function UserMenu() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        
+        {/* Portal Access - Solo para clientes y operadores */}
+        {(isClient || isOperator) && (
+          <>
+            <DropdownMenuItem className="cursor-pointer" onClick={handlePortalAccess}>
+              <Building className="mr-2 h-4 w-4" />
+              <span>
+                {isClient ? 'Portal Cliente' : 'Portal Operador'}
+              </span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
+        
         <DropdownMenuItem className="cursor-pointer">
           <User className="mr-2 h-4 w-4" />
           <span>Perfil</span>
