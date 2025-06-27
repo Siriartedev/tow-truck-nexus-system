@@ -50,8 +50,8 @@ export default function CreateEventForm({ event, onClose, onSubmit }: CreateEven
     defaultValues: {
       title: event?.title || '',
       description: event?.description || '',
-      start_date: event?.start_date || '',
-      end_date: event?.end_date || '',
+      start_date: event?.start_date || format(new Date(), 'yyyy-MM-dd'),
+      end_date: event?.end_date || format(new Date(), 'yyyy-MM-dd'),
       start_time: event?.start_time || '09:00',
       end_time: event?.end_time || '17:00',
       event_type: event?.event_type || 'other',
