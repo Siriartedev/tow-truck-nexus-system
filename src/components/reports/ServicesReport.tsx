@@ -11,8 +11,9 @@ import {
   AlertTriangle,
   Download
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { usePDFGenerator } from '@/hooks/usePDFGenerator';
-import { ServiceReportItem } from '@/types';
+import { ServiceReportItem } from '@/types/reports';
 
 export default function ServicesReport() {
   // Mock data
