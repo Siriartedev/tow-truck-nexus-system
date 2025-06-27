@@ -52,29 +52,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(session?.user ?? null);
         
         if (session?.user && event !== 'SIGNED_OUT') {
-          // Small delay to ensure the user profile exists in the database
+          // Fetch or create user profile
           setTimeout(async () => {
             if (!mounted) return;
             
             try {
-              const { data: profileData, error } = await supabase
+              // First try to get existing profile
+              const { data: profileData, error: fetchError } = await supabase
                 .from('user_profiles')
                 .select('*')
                 .eq('user_id', session.user.id)
                 .maybeSingle();
               
-              if (error && error.code !== 'PGRST116') {
-                console.error('Error fetching profile:', error);
+              if (fetchError) {
+                console.error('Error fetching profile:', fetchError);
                 toast.error('Error al cargar el perfil del usuario');
-              } else if (!profileData) {
-                console.warn('No profile found for user:', session.user.email);
-                // Create a minimal profile if it doesn't exist
+                setLoading(false);
+                return;
+              }
+
+              if (profileData) {
+                console.log('Profile found:', profileData);
+                setProfile(profileData);
+              } else {
+                console.log('No profile found, creating one for:', session.user.email);
+                // Create profile if it doesn't exist
                 const { data: newProfile, error: createError } = await supabase
                   .from('user_profiles')
                   .insert({
                     user_id: session.user.id,
                     email: session.user.email || '',
-                    name: session.user.email || 'Usuario',
+                    name: session.user.email?.split('@')[0] || 'Usuario',
                     role: 'client'
                   })
                   .select()
@@ -84,22 +92,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   console.error('Error creating profile:', createError);
                   toast.error('Error al crear el perfil del usuario');
                 } else {
+                  console.log('Profile created:', newProfile);
                   setProfile(newProfile);
+                  toast.success('Perfil creado exitosamente');
                 }
-              } else {
-                console.log('Profile loaded:', profileData);
-                setProfile(profileData);
               }
             } catch (err) {
-              console.error('Profile fetch error:', err);
+              console.error('Profile operation error:', err);
               toast.error('Error de conexión al cargar el perfil');
             }
+            
+            setLoading(false);
           }, 100);
         } else {
           setProfile(null);
+          setLoading(false);
         }
-        
-        setLoading(false);
       }
     );
 
@@ -107,6 +115,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!mounted) return;
       
+      console.log('Initial session check:', session?.user?.email);
       setSession(session);
       setUser(session?.user ?? null);
       if (!session) {
@@ -123,7 +132,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signInWithPassword({
+      console.log('Attempting sign in for:', email);
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -136,6 +147,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           toast.error('Error al iniciar sesión: ' + error.message);
         }
       } else {
+        console.log('Sign in successful for:', data.user?.email);
         toast.success('Sesión iniciada correctamente');
       }
       
@@ -182,14 +194,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
-      await supabase.auth.signOut();
+      // Clear state immediately to prevent UI flickering
       setUser(null);
       setProfile(null);
       setSession(null);
-      toast.success('Sesión cerrada');
+      
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Sign out error:', error);
+        // Don't show error to user for sign out issues
+      } else {
+        toast.success('Sesión cerrada');
+      }
     } catch (err) {
       console.error('Sign out error:', err);
-      toast.error('Error al cerrar sesión');
+      // Don't show error to user for sign out issues
     }
   };
 
