@@ -16,6 +16,7 @@ import {
   X
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { cn } from '@/lib/utils';
 
 const sidebarItems = [
@@ -38,7 +39,7 @@ export default function MainLayout() {
   const location = useLocation();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Mobile sidebar */}
       <div className={cn(
         "fixed inset-0 z-50 lg:hidden",
@@ -106,12 +107,12 @@ export default function MainLayout() {
       {/* Main content */}
       <div className="lg:ml-64">
         {/* Top bar */}
-        <header className="bg-white shadow-sm border-b px-4 py-3">
+        <header className="bg-card shadow-sm border-b border-border px-4 py-3">
           <div className="flex items-center justify-between">
             <Button
               variant="ghost"
               size="icon"
-              className="lg:hidden text-green-dark hover:bg-green-light/20"
+              className="lg:hidden text-foreground hover:bg-accent"
               onClick={() => setSidebarOpen(true)}
             >
               <Menu className="h-6 w-6" />
@@ -127,6 +128,7 @@ export default function MainLayout() {
                   Portal Cliente
                 </Button>
               </Link>
+              <ThemeToggle />
             </div>
           </div>
         </header>
