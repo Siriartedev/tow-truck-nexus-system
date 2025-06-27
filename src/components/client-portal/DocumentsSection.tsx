@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,6 +14,7 @@ import {
   Calendar,
   Eye
 } from 'lucide-react';
+import { toast } from 'sonner';
 import type { ClientDocument } from '@/types/client-portal';
 import { usePDFGenerator } from '@/hooks/usePDFGenerator';
 
