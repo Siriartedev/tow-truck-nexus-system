@@ -21,14 +21,14 @@ export async function generateCertificatePDF(
 ): Promise<Blob> {
   const pdf = new PDFGenerator();
   
-  // Header con información de la empresa desde configuración
+  // HEADER - Exacto como las imágenes
   const companyName = companyConfig?.name || 'GRÚAS 5 NORTE';
   const companyRut = companyConfig?.rut || '76.769.841-0';
   const companyAddress = companyConfig?.address || 'Panamericana Norte Km. 841, Copiapó';
   const companyPhone = companyConfig?.phone || '+56 9 62380627';
   const companyEmail = companyConfig?.email || 'asistencia@gruas5norte.cl';
   
-  // Logo si existe
+  // Logo
   if (companyConfig?.logo_url) {
     try {
       pdf.addImage(companyConfig.logo_url, 40, 20);
@@ -43,7 +43,7 @@ export async function generateCertificatePDF(
   pdf.addText(`Tel: ${companyPhone} | Email: ${companyEmail}`, { size: 10 });
   pdf.addText('');
   
-  // Título principal centrado
+  // Título centrado
   pdf.addText('REPORTE DE INSPECCIÓN PRE-SERVICIO', { bold: true, size: 18 });
   pdf.addText('');
   
@@ -55,7 +55,7 @@ export async function generateCertificatePDF(
   pdf.addText(`Documento generado: ${currentDate.toLocaleDateString('es-ES')}, ${currentDate.toLocaleTimeString('es-ES')}`, { size: 12 });
   pdf.addText('');
   
-  // INFORMACIÓN DEL SERVICIO
+  // INFORMACIÓN DEL SERVICIO - Tabla simple
   pdf.addText('INFORMACIÓN DEL SERVICIO', { bold: true, size: 14 });
   pdf.addText('');
   
@@ -73,7 +73,7 @@ export async function generateCertificatePDF(
   pdf.addTable(['Campo', 'Valor'], serviceInfoTable);
   pdf.addText('');
   
-  // INVENTARIO DE EQUIPOS Y ACCESORIOS
+  // INVENTARIO - Exacto 6 columnas como en la imagen
   pdf.addText('INVENTARIO DE EQUIPOS Y ACCESORIOS', { bold: true, size: 14 });
   pdf.addText('');
   
@@ -97,6 +97,7 @@ export async function generateCertificatePDF(
   
   pdf.addTable(inventoryHeaders, inventoryRows);
   
+  // Resumen de elementos
   const checkedItems = inspection.inspection_items.filter(item => item.checked);
   const totalItems = inspection.inspection_items.length;
   const percentage = Math.round((checkedItems.length / totalItems) * 100);
@@ -106,44 +107,30 @@ export async function generateCertificatePDF(
   pdf.addText(`Porcentaje de completitud: ${percentage}%`, { bold: true, size: 12 });
   pdf.addText('');
   
-  // SET FOTOGRÁFICO - Con fotografías reales procesadas asíncronamente
+  // SET FOTOGRÁFICO - Simple como en la imagen
   pdf.addText('SET FOTOGRÁFICO', { bold: true, size: 14 });
   pdf.addText('');
   
   const photosWithFiles = inspection.photos.filter(p => p.file);
   
   if (photosWithFiles.length > 0) {
-    // Procesar todas las imágenes de forma asíncrona
-    const processedPhotos = await Promise.all(
-      photosWithFiles.map(async (photo, index) => {
-        try {
-          const base64Data = await fileToBase64(photo.file!);
-          const timestamp = new Date(photo.timestamp);
-          const dateStr = timestamp.toLocaleDateString('es-ES');
-          const timeStr = timestamp.toLocaleTimeString('es-ES', { hour12: false });
-          
-          return {
-            index: index + 1,
-            type: photo.type.charAt(0).toUpperCase() + photo.type.slice(1),
-            dateStr,
-            timeStr,
-            base64Data
-          };
-        } catch (error) {
-          console.error('Error processing photo:', error);
-          return null;
-        }
-      })
-    );
-    
-    // Agregar las fotos procesadas al PDF
-    processedPhotos.forEach(photo => {
-      if (photo) {
-        pdf.addText(`${photo.type} - ${photo.dateStr} ${photo.timeStr}`, { bold: true, size: 12 });
-        pdf.addImage(photo.base64Data, 50, 30);
+    // Procesar fotos de forma síncrona
+    for (let i = 0; i < photosWithFiles.length; i++) {
+      const photo = photosWithFiles[i];
+      try {
+        const base64Data = await fileToBase64(photo.file!);
+        const timestamp = new Date(photo.timestamp);
+        const dateStr = timestamp.toLocaleDateString('es-ES');
+        const timeStr = timestamp.toLocaleTimeString('es-ES', { hour12: false });
+        
+        // Solo nombre de vista y fecha/hora
+        pdf.addText(`${photo.type.charAt(0).toUpperCase() + photo.type.slice(1)} - ${dateStr} ${timeStr}`, { bold: true, size: 12 });
+        pdf.addImage(base64Data, 50, 30);
         pdf.addText('');
+      } catch (error) {
+        console.error('Error processing photo:', error);
       }
-    });
+    }
   } else {
     pdf.addText('No se capturaron fotografías durante la inspección.', { size: 12 });
     pdf.addText('');
@@ -152,7 +139,7 @@ export async function generateCertificatePDF(
   pdf.addText(`Set fotográfico: ${photosWithFiles.length} fotografías procesadas`, { bold: true, size: 12 });
   pdf.addText('');
   
-  // OBSERVACIONES DEL VEHÍCULO - Simplificadas
+  // OBSERVACIONES - Simple
   pdf.addText('OBSERVACIONES DEL VEHÍCULO', { bold: true, size: 14 });
   pdf.addText('');
   
@@ -160,11 +147,10 @@ export async function generateCertificatePDF(
   pdf.addText(observationText, { size: 12 });
   pdf.addText('');
   
-  // FIRMAS DIGITALES - Posicionadas lado a lado con firmas reales
+  // FIRMAS DIGITALES - Lado a lado
   pdf.addText('FIRMAS DIGITALES', { bold: true, size: 14 });
   pdf.addText('');
   
-  // Posicionar las firmas horizontalmente con las firmas reales capturadas
   pdf.addSideBySideSignatures(
     inspection.signatures.operator,
     inspection.signatures.client,
@@ -174,7 +160,7 @@ export async function generateCertificatePDF(
   
   pdf.addText('');
   
-  // Footer con información de la empresa
+  // Footer básico
   pdf.addText(`${companyName} - ${companyAddress}`, { size: 10 });
   pdf.addText(`Tel: ${companyPhone} | Email: ${companyEmail}`, { size: 10 });
 
