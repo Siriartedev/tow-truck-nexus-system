@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -15,6 +16,7 @@ import Costs from "./pages/Costs";
 import Calendar from "./pages/Calendar";
 import Closures from "./pages/Closures";
 import ClientPortal from "./pages/ClientPortal";
+import OperatorPortal from "./pages/OperatorPortal";
 import NotFound from "./pages/NotFound";
 import Invoices from "./pages/Invoices";
 import Reports from "./pages/Reports";
@@ -43,10 +45,10 @@ const App = () => (
               <Route path="costs" element={<Costs />} />
               <Route path="reports" element={<Reports />} />
               <Route path="configuration" element={<Configuration />} />
-              <Route path="portal-operator" element={<div className="p-6"><h1 className="text-2xl font-bold">Portal del Operador</h1><p>Módulo en construcción...</p></div>} />
             </Route>
-            {/* Client Portal - standalone route */}
+            {/* Standalone portals */}
             <Route path="portal-client" element={<ClientPortal />} />
+            <Route path="portal-operator" element={<OperatorPortal />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
