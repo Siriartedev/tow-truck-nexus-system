@@ -88,7 +88,14 @@ export default function CreateCostForm({ onClose, onSubmit }: CreateCostFormProp
   ];
 
   const onFormSubmit = (data: CreateCostData) => {
-    onSubmit(data);
+    // Clean up "none" values before submitting
+    const cleanData = {
+      ...data,
+      crane_id: data.crane_id === 'none' ? undefined : data.crane_id,
+      operator_id: data.operator_id === 'none' ? undefined : data.operator_id,
+      service_id: data.service_id === 'none' ? undefined : data.service_id,
+    };
+    onSubmit(cleanData);
     onClose();
   };
 
@@ -103,7 +110,7 @@ export default function CreateCostForm({ onClose, onSubmit }: CreateCostFormProp
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-card border-green-dark/20">
         <CardHeader className="flex flex-row items-center justify-between pb-4">
-          <CardTitle className="text-xl font-bold text-foreground">Editar Costo</CardTitle>
+          <CardTitle className="text-xl font-bold text-foreground">Nuevo Costo</CardTitle>
           <Button variant="ghost" size="icon" onClick={onClose} className="text-muted-foreground hover:text-foreground">
             <X className="h-5 w-5" />
           </Button>
@@ -187,12 +194,12 @@ export default function CreateCostForm({ onClose, onSubmit }: CreateCostFormProp
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="crane_id" className="text-foreground font-medium">Grúa (Opcional)</Label>
-                <Select onValueChange={(value) => setValue('crane_id', value || undefined)}>
+                <Select onValueChange={(value) => setValue('crane_id', value === 'none' ? undefined : value)}>
                   <SelectTrigger className="border-green-dark/20 focus:border-green-medium">
                     <SelectValue placeholder="Sin asociar" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Sin asociar</SelectItem>
+                    <SelectItem value="none">Sin asociar</SelectItem>
                     {cranes.map((crane) => (
                       <SelectItem key={crane.id} value={crane.id}>
                         {crane.name}
@@ -204,12 +211,12 @@ export default function CreateCostForm({ onClose, onSubmit }: CreateCostFormProp
 
               <div className="space-y-2">
                 <Label htmlFor="operator_id" className="text-foreground font-medium">Operador (Opcional)</Label>
-                <Select onValueChange={(value) => setValue('operator_id', value || undefined)}>
+                <Select onValueChange={(value) => setValue('operator_id', value === 'none' ? undefined : value)}>
                   <SelectTrigger className="border-green-dark/20 focus:border-green-medium">
                     <SelectValue placeholder="Sin asociar" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Sin asociar</SelectItem>
+                    <SelectItem value="none">Sin asociar</SelectItem>
                     {operators.map((operator) => (
                       <SelectItem key={operator.id} value={operator.id}>
                         {operator.name}
@@ -223,12 +230,12 @@ export default function CreateCostForm({ onClose, onSubmit }: CreateCostFormProp
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="service_id" className="text-foreground font-medium">Servicio (Opcional)</Label>
-                <Select onValueChange={(value) => setValue('service_id', value || undefined)}>
+                <Select onValueChange={(value) => setValue('service_id', value === 'none' ? undefined : value)}>
                   <SelectTrigger className="border-green-dark/20 focus:border-green-medium">
                     <SelectValue placeholder="Sin asociar" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Sin asociar</SelectItem>
+                    <SelectItem value="none">Sin asociar</SelectItem>
                     {services.map((service) => (
                       <SelectItem key={service.id} value={service.id}>
                         {service.name}
