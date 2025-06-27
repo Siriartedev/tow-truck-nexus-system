@@ -139,7 +139,7 @@ export async function generateCertificatePDF(
     // Agregar las fotos procesadas al PDF
     processedPhotos.forEach(photo => {
       if (photo) {
-        pdf.addText(`${photo.index}. Foto ${photo.type} - ${photo.dateStr} ${photo.timeStr}`, { bold: true, size: 12 });
+        pdf.addText(`${photo.type} - ${photo.dateStr} ${photo.timeStr}`, { bold: true, size: 12 });
         pdf.addImage(photo.base64Data, 50, 30);
         pdf.addText('');
       }
@@ -160,38 +160,18 @@ export async function generateCertificatePDF(
   pdf.addText(observationText, { size: 12 });
   pdf.addText('');
   
-  // FIRMAS DIGITALES - Con firmas reales
+  // FIRMAS DIGITALES - Posicionadas una al lado de la otra
   pdf.addText('FIRMAS DIGITALES', { bold: true, size: 14 });
   pdf.addText('');
   
-  // Firma del Operador
-  pdf.addText('Firma del Operador:', { bold: true, size: 12 });
-  pdf.addText('');
+  // Posicionar las firmas horizontalmente
+  pdf.addSideBySideSignatures(
+    inspection.signatures.operator,
+    inspection.signatures.client,
+    service.operator_name,
+    inspection.client_present_name || service.client_name
+  );
   
-  if (inspection.signatures.operator) {
-    pdf.addSignature(inspection.signatures.operator, 60, 30);
-  } else {
-    pdf.addText('[SIN FIRMA CAPTURADA]', { size: 10 });
-  }
-  
-  pdf.addText('_'.repeat(50), { size: 8 });
-  pdf.addText(service.operator_name, { size: 12 });
-  pdf.addText('Operador de Grúa', { size: 10 });
-  pdf.addText('');
-  
-  // Firma del Cliente
-  pdf.addText('Firma del Cliente:', { bold: true, size: 12 });
-  pdf.addText('');
-  
-  if (inspection.signatures.client) {
-    pdf.addSignature(inspection.signatures.client, 60, 30);
-  } else {
-    pdf.addText('[SIN FIRMA CAPTURADA]', { size: 10 });
-  }
-  
-  pdf.addText('_'.repeat(50), { size: 8 });
-  pdf.addText(inspection.client_present_name || service.client_name, { size: 12 });
-  pdf.addText('Cliente', { size: 10 });
   pdf.addText('');
   
   // Footer con información de la empresa

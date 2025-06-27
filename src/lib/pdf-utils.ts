@@ -1,4 +1,3 @@
-
 import jsPDF from 'jspdf';
 
 export interface PDFOptions {
@@ -24,6 +23,94 @@ export class PDFGenerator {
     
     this.pageWidth = this.doc.internal.pageSize.getWidth();
     this.pageHeight = this.doc.internal.pageSize.getHeight();
+  }
+
+  addSideBySideSignatures(
+    operatorSignature: string | null, 
+    clientSignature: string | null, 
+    operatorName: string, 
+    clientName: string
+  ): void {
+    const signatureWidth = 45;
+    const signatureHeight = 25;
+    const spacing = 20;
+    
+    // Calcular posiciones para centrar las firmas
+    const totalWidth = (signatureWidth * 2) + spacing;
+    const startX = (this.pageWidth - totalWidth) / 2;
+    
+    const operatorX = startX;
+    const clientX = startX + signatureWidth + spacing;
+    
+    // Verificar espacio en la página
+    if (this.yPosition + signatureHeight + 30 > this.pageHeight - 30) {
+      this.doc.addPage();
+      this.yPosition = 20;
+    }
+    
+    // Títulos de las firmas
+    this.doc.setFontSize(12);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text('Firma del Operador:', operatorX, this.yPosition);
+    this.doc.text('Firma del Cliente:', clientX, this.yPosition);
+    
+    this.yPosition += 8;
+    
+    // Agregar las firmas
+    if (operatorSignature) {
+      try {
+        this.doc.addImage(operatorSignature, 'PNG', operatorX, this.yPosition, signatureWidth, signatureHeight);
+      } catch (error) {
+        console.error('Error adding operator signature:', error);
+        this.doc.setFontSize(10);
+        this.doc.setFont('helvetica', 'normal');
+        this.doc.text('[SIN FIRMA]', operatorX, this.yPosition + 10);
+      }
+    } else {
+      this.doc.setFontSize(10);
+      this.doc.setFont('helvetica', 'normal');
+      this.doc.text('[SIN FIRMA]', operatorX, this.yPosition + 10);
+    }
+    
+    if (clientSignature) {
+      try {
+        this.doc.addImage(clientSignature, 'PNG', clientX, this.yPosition, signatureWidth, signatureHeight);
+      } catch (error) {
+        console.error('Error adding client signature:', error);
+        this.doc.setFontSize(10);
+        this.doc.setFont('helvetica', 'normal');
+        this.doc.text('[SIN FIRMA]', clientX, this.yPosition + 10);
+      }
+    } else {
+      this.doc.setFontSize(10);
+      this.doc.setFont('helvetica', 'normal');
+      this.doc.text('[SIN FIRMA]', clientX, this.yPosition + 10);
+    }
+    
+    this.yPosition += signatureHeight + 5;
+    
+    // Líneas de firma
+    this.doc.setFontSize(8);
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.line(operatorX, this.yPosition, operatorX + signatureWidth, this.yPosition);
+    this.doc.line(clientX, this.yPosition, clientX + signatureWidth, this.yPosition);
+    
+    this.yPosition += 5;
+    
+    // Nombres
+    this.doc.setFontSize(12);
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.text(operatorName, operatorX, this.yPosition);
+    this.doc.text(clientName, clientX, this.yPosition);
+    
+    this.yPosition += 6;
+    
+    // Roles
+    this.doc.setFontSize(10);
+    this.doc.text('Operador de Grúa', operatorX, this.yPosition);
+    this.doc.text('Cliente', clientX, this.yPosition);
+    
+    this.yPosition += 10;
   }
 
   addHeader(title: string, subtitle?: string): void {
