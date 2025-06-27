@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Truck, LogIn, UserPlus, ArrowLeft, Building, User as UserIcon } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Link } from 'react-router-dom';
+import { toast } from 'sonner';
 
 export default function Auth() {
   const [email, setEmail] = useState('');
@@ -22,7 +22,7 @@ export default function Auth() {
   const location = useLocation();
   
   const from = location.state?.from?.pathname || '/';
-
+  
   // Redireccionar automáticamente según el rol después del login
   useEffect(() => {
     if (user && profile) {
