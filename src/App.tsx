@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,6 +8,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import MainLayout from "./components/layout/MainLayout";
 import Dashboard from "./pages/Dashboard";
 import Services from "./pages/Services";
+import ServiceTypes from "./pages/ServiceTypes";
 import Clients from "./pages/Clients";
 import NotFound from "./pages/NotFound";
 
@@ -23,9 +25,9 @@ const App = () => (
             <Route path="/" element={<MainLayout />}>
               <Route index element={<Dashboard />} />
               <Route path="services" element={<Services />} />
+              <Route path="service-types" element={<ServiceTypes />} />
               <Route path="clients" element={<Clients />} />
               {/* Placeholder routes for other modules */}
-              <Route path="service-types" element={<div className="p-6"><h1 className="text-2xl font-bold">Tipos de Servicios</h1><p>Módulo en construcción...</p></div>} />
               <Route path="cranes" element={<div className="p-6"><h1 className="text-2xl font-bold">Grúas</h1><p>Módulo en construcción...</p></div>} />
               <Route path="operators" element={<div className="p-6"><h1 className="text-2xl font-bold">Operadores</h1><p>Módulo en construcción...</p></div>} />
               <Route path="closures" element={<div className="p-6"><h1 className="text-2xl font-bold">Cierres</h1><p>Módulo en construcción...</p></div>} />
