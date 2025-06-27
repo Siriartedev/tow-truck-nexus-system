@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Service } from '@/types/services';
 import { OperatorAuth, ServiceInspection, DEFAULT_INSPECTION_ITEMS } from '@/types/operator-portal';
@@ -14,8 +13,8 @@ interface ServiceInspectionFormProps {
   onBack: () => void;
 }
 
-// Mock company config - en un caso real vendría de la configuración
-const mockCompanyConfig = {
+// Configuración de empresa - en un caso real vendría de la base de datos
+const getCompanyConfig = () => ({
   id: '1',
   name: 'GRÚAS 5 NORTE',
   rut: '76.769.841-0',
@@ -24,9 +23,10 @@ const mockCompanyConfig = {
   email: 'asistencia@gruas5norte.cl',
   folio_format: 'GRU-{YYYY}-{NNNN}',
   next_folio: 1001,
+  logo_url: undefined, // Se puede configurar en la configuración de empresa
   created_at: '',
   updated_at: ''
-};
+});
 
 export default function ServiceInspectionForm({ service, operator, onBack }: ServiceInspectionFormProps) {
   const [activeTab, setActiveTab] = useState<string>('inventory');
@@ -78,6 +78,9 @@ export default function ServiceInspectionForm({ service, operator, onBack }: Ser
 
       console.log('Inspección completada:', updatedInspection);
       
+      // Obtener configuración de empresa
+      const companyConfig = getCompanyConfig();
+      
       // Generate PDFs automatically with company config
       toast.info('Generando documentos del servicio...');
       
@@ -86,7 +89,7 @@ export default function ServiceInspectionForm({ service, operator, onBack }: Ser
       
       // Generate certificate with company config
       if (updatedInspection.signatures.operator && updatedInspection.signatures.client) {
-        await generateCertificate(service, updatedInspection, mockCompanyConfig);
+        await generateCertificate(service, updatedInspection, companyConfig);
       }
       
       toast.success('Inspección completada exitosamente. El servicio ahora está en progreso.');
