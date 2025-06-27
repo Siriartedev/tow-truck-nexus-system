@@ -6,62 +6,58 @@ import type { ServiceInspection } from '@/types/operator-portal';
 export function generateCertificatePDF(service: Service, inspection: ServiceInspection): Blob {
   const pdf = new PDFGenerator();
   
-  // Header moderno con información de la empresa
-  pdf.addText('GRÚAS 5 NORTE', { bold: true, size: 18 });
-  pdf.addText('CERTIFICADO DE INSPECCIÓN PRE-SERVICIO', { bold: true, size: 14 });
+  // Header exacto como en la imagen - Logo y título
+  pdf.addText('GRÚAS 5 NORTE', { bold: true, size: 16 });
+  pdf.addText('SERVICIO 24 HORAS', { size: 10 });
+  pdf.addText('');
+  
+  // Título principal centrado
+  pdf.addText('REPORTE DE INSPECCIÓN PRE-SERVICIO', { bold: true, size: 18 });
   pdf.addText('');
   
   // Información de la empresa
-  pdf.addText('RUT: 76.769.841-0', { size: 10 });
-  pdf.addText('Panamericana Norte Km. 841, Copiapó - Región de Atacama', { size: 10 });
-  pdf.addText('Teléfono: +56 9 62380627 | Email: asistencia@gruas5norte.cl', { size: 10 });
+  pdf.addText('Grúas 5 Norte', { bold: true, size: 14 });
+  pdf.addText('RUT: 76.769.841-0', { size: 12 });
+  pdf.addText('Panamericana Norte Km. 841, Copiapó', { size: 12 });
+  pdf.addText('Tel: +56 9 62380627 | Email: asistencia@gruas5norte.cl', { size: 12 });
+  pdf.addText('');
+  
   pdf.addHorizontalLine();
-
-  // Información del documento
+  
+  // Información del documento (folio y fecha de generación)
   const currentDate = new Date();
-  const documentInfo = [
-    ['FOLIO:', service.folio, 'FECHA:', currentDate.toLocaleDateString('es-ES')],
-    ['OPERADOR:', service.operator_name, 'HORA:', currentDate.toLocaleTimeString('es-ES', { hour12: false })]
-  ];
-  pdf.addTable(['', '', '', ''], documentInfo);
+  pdf.addText(`Folio: ${service.folio}`, { size: 12 });
+  pdf.addText(`Documento generado: ${currentDate.toLocaleDateString('es-ES')}, ${currentDate.toLocaleTimeString('es-ES')}`, { size: 12 });
   pdf.addText('');
-
-  // Información del servicio
-  pdf.addText('INFORMACIÓN DEL SERVICIO', { bold: true, size: 12 });
-  const serviceInfo = [
+  
+  // INFORMACIÓN DEL SERVICIO - Tabla exacta como en la imagen
+  pdf.addText('INFORMACIÓN DEL SERVICIO', { bold: true, size: 14 });
+  pdf.addText('');
+  
+  const serviceInfoTable = [
+    ['Folio:', service.folio],
+    ['Cliente:', service.client_name],
     ['Fecha de Servicio:', new Date(service.service_date).toLocaleDateString('es-ES')],
-    ['Tipo de Servicio:', service.service_type_name],
     ['Origen:', service.pickup_location],
-    ['Destino:', service.delivery_location]
+    ['Destino:', service.delivery_location],
+    ['Vehículo:', `${service.vehicle_brand || ''} ${service.vehicle_model || ''} - ${service.license_plate || ''}`.trim()],
+    ['Grúa:', service.crane_name],
+    ['Operador:', service.operator_name]
   ];
-  pdf.addTable(['Campo', 'Valor'], serviceInfo);
+  
+  pdf.addTable(['Campo', 'Valor'], serviceInfoTable);
   pdf.addText('');
-
-  // Información del vehículo
-  pdf.addText('DATOS DEL VEHÍCULO', { bold: true, size: 12 });
-  const vehicleInfo = [
-    ['Marca:', service.vehicle_brand || 'No especificado', 'Modelo:', service.vehicle_model || 'No especificado'],
-    ['Patente:', service.license_plate || 'No especificado', 'Color:', 'No especificado']
-  ];
-  pdf.addTable(['', '', '', ''], vehicleInfo);
   pdf.addText('');
-
-  // Cliente presente
-  pdf.addText('CLIENTE PRESENTE', { bold: true, size: 12 });
-  pdf.addText(`Nombre: ${inspection.client_present_name || 'No especificado'}`, { size: 10 });
-  pdf.addText(`Cliente/Empresa: ${service.client_name}`, { size: 10 });
+  
+  // INVENTARIO DE EQUIPOS Y ACCESORIOS - Tabla de 6 columnas exacta
+  pdf.addText('INVENTARIO DE EQUIPOS Y ACCESORIOS', { bold: true, size: 14 });
   pdf.addText('');
-
-  // INVENTARIO DE EQUIPOS Y ACCESORIOS
-  pdf.addText('INVENTARIO DE EQUIPOS Y ACCESORIOS', { bold: true, size: 12 });
-  pdf.addText('Marque SI para elementos presentes, NO para elementos ausentes:', { size: 10 });
-  pdf.addText('');
-
-  // Crear tabla de inventario con 6 columnas (3 pares elemento/estado)
+  
+  // Headers de la tabla de inventario (6 columnas)
   const inventoryHeaders = ['Elemento', 'Estado', 'Elemento', 'Estado', 'Elemento', 'Estado'];
   const inventoryRows: string[][] = [];
   
-  // Agrupar elementos en grupos de 3 para la tabla
+  // Agrupar elementos en grupos de 3 para crear filas de 6 columnas
   for (let i = 0; i < inspection.inspection_items.length; i += 3) {
     const row: string[] = [];
     for (let j = 0; j < 3; j++) {
@@ -76,7 +72,7 @@ export function generateCertificatePDF(service: Service, inspection: ServiceInsp
     }
     inventoryRows.push(row);
   }
-
+  
   pdf.addTable(inventoryHeaders, inventoryRows);
   
   // Resumen del inventario
@@ -85,18 +81,17 @@ export function generateCertificatePDF(service: Service, inspection: ServiceInsp
   const percentage = Math.round((checkedItems.length / totalItems) * 100);
   
   pdf.addText('');
-  pdf.addText(`RESUMEN: ${checkedItems.length} elementos verificados de ${totalItems} elementos inspeccionados`, { bold: true, size: 10 });
-  pdf.addText(`Porcentaje de completitud: ${percentage}%`, { size: 10 });
+  pdf.addText(`Elementos verificados: ${checkedItems.length} de ${totalItems}`, { bold: true, size: 12 });
+  pdf.addText(`Porcentaje de completitud: ${percentage}%`, { bold: true, size: 12 });
   pdf.addText('');
-
-  // SET FOTOGRÁFICO
-  pdf.addText('SET FOTOGRÁFICO', { bold: true, size: 12 });
-  const photosWithFiles = inspection.photos.filter(p => p.file);
-  const totalPhotos = inspection.photos.length;
+  pdf.addText('');
   
-  pdf.addText(`Set fotográfico: ${photosWithFiles.length} de ${totalPhotos} fotos procesadas`, { size: 10, bold: true });
+  // SET FOTOGRÁFICO - Exacto como en la imagen
+  pdf.addText('SET FOTOGRÁFICO', { bold: true, size: 14 });
   pdf.addText('');
-
+  
+  const photosWithFiles = inspection.photos.filter(p => p.file);
+  
   if (photosWithFiles.length > 0) {
     photosWithFiles.forEach((photo, index) => {
       const photoType = photo.type.charAt(0).toUpperCase() + photo.type.slice(1);
@@ -104,76 +99,65 @@ export function generateCertificatePDF(service: Service, inspection: ServiceInsp
       const dateStr = timestamp.toLocaleDateString('es-ES');
       const timeStr = timestamp.toLocaleTimeString('es-ES', { hour12: false });
       
-      pdf.addText(`${index + 1}. Foto ${photoType} - ${dateStr} ${timeStr}`, { size: 9 });
+      pdf.addText(`${photoType}`, { bold: true, size: 12 });
+      pdf.addText('');
+      pdf.addText('[IMAGEN CAPTURADA]', { size: 10 });
+      pdf.addText(`${dateStr}, ${timeStr}`, { size: 10 });
+      pdf.addText('');
     });
-  } else {
-    pdf.addText('No se procesaron fotografías durante la inspección.', { size: 10 });
-  }
-  pdf.addText('');
-
-  // OBSERVACIONES DEL VEHÍCULO
-  pdf.addText('OBSERVACIONES DEL VEHÍCULO', { bold: true, size: 12 });
-  pdf.addText('Detalle del estado del vehículo, daños o condiciones especiales:', { size: 10 });
-  pdf.addText('');
-  
-  // Crear caja de observaciones
-  const observationText = inspection.observations || 'Sin observaciones registradas.';
-  pdf.addText('┌─────────────────────────────────────────────────────────────────────────────────────┐', { size: 8 });
-  
-  // Dividir observaciones en líneas que quepan en la caja
-  const maxCharsPerLine = 83;
-  const observationLines = observationText.match(new RegExp(`.{1,${maxCharsPerLine}}`, 'g')) || [''];
-  
-  observationLines.forEach(line => {
-    pdf.addText(`│ ${line.padEnd(maxCharsPerLine)} │`, { size: 9 });
-  });
-  
-  // Agregar líneas vacías si es necesario
-  for (let i = observationLines.length; i < 3; i++) {
-    pdf.addText(`│ ${' '.repeat(maxCharsPerLine)} │`, { size: 8 });
   }
   
-  pdf.addText('└─────────────────────────────────────────────────────────────────────────────────────┘', { size: 8 });
+  pdf.addText(`Set fotográfico: ${photosWithFiles.length} de ${inspection.photos.length} fotos procesadas`, { bold: true, size: 12 });
   pdf.addText('');
-
-  // FIRMAS DIGITALES
-  pdf.addText('FIRMAS DIGITALES', { bold: true, size: 12 });
-  pdf.addText('Las siguientes firmas validan la inspección realizada:', { size: 10 });
   pdf.addText('');
   
-  // Firma del operador
-  pdf.addText('FIRMA DEL OPERADOR:', { bold: true, size: 11 });
+  // FIRMAS DIGITALES - Exacto como en la imagen
+  pdf.addText('FIRMAS DIGITALES', { bold: true, size: 14 });
+  pdf.addText('');
+  
+  // Firma del Operador
+  pdf.addText('Firma del Operador:', { bold: true, size: 12 });
+  pdf.addText('');
+  
   if (inspection.signatures.operator) {
     pdf.addText('[FIRMA DIGITAL CAPTURADA]', { size: 10, bold: true });
   } else {
     pdf.addText('[SIN FIRMA]', { size: 10 });
   }
-  pdf.addText(`Nombre: ${service.operator_name}`, { size: 10 });
-  pdf.addText(`Fecha: ${currentDate.toLocaleDateString('es-ES')} ${currentDate.toLocaleTimeString('es-ES')}`, { size: 10 });
+  
+  pdf.addText('_'.repeat(50), { size: 8 });
+  pdf.addText(service.operator_name, { size: 12 });
+  pdf.addText('');
   pdf.addText('');
   
-  // Firma del cliente
-  pdf.addText('FIRMA DEL CLIENTE:', { bold: true, size: 11 });
+  // Firma del Cliente
+  pdf.addText('Firma del Cliente:', { bold: true, size: 12 });
+  pdf.addText('');
+  
   if (inspection.signatures.client) {
     pdf.addText('[FIRMA DIGITAL CAPTURADA]', { size: 10, bold: true });
   } else {
     pdf.addText('[SIN FIRMA]', { size: 10 });
   }
-  pdf.addText(`Nombre: ${inspection.client_present_name || 'Cliente/Representante'}`, { size: 10 });
-  pdf.addText(`Fecha: ${currentDate.toLocaleDateString('es-ES')} ${currentDate.toLocaleTimeString('es-ES')}`, { size: 10 });
+  
+  pdf.addText('_'.repeat(50), { size: 8 });
+  pdf.addText(inspection.client_present_name || 'Cliente', { size: 12 });
   pdf.addText('');
-
-  // Footer legal
-  pdf.addText('DECLARACIÓN LEGAL', { bold: true, size: 11 });
-  pdf.addText('Este certificado constituye evidencia del estado del vehículo al momento del retiro.', { size: 9 });
-  pdf.addText('Cualquier daño no registrado que sea detectado posteriormente no será responsabilidad', { size: 9 });
-  pdf.addText('de Grúas 5 Norte. Este documento tiene validez legal para efectos de reclamos.', { size: 9 });
   pdf.addText('');
-
-  // Footer de contacto
-  pdf.addText('────────────────────────────────────────────────────────────────────────────────────', { size: 8 });
-  pdf.addText('GRÚAS 5 NORTE - Panamericana Norte Km. 841, Copiapó - Tel: +56 9 62380627', { size: 8 });
-  pdf.addText(`Documento generado automáticamente el ${currentDate.toLocaleDateString('es-ES')} a las ${currentDate.toLocaleTimeString('es-ES')}`, { size: 8 });
+  
+  // OBSERVACIONES DEL VEHÍCULO - Exacto como en la imagen
+  pdf.addText('OBSERVACIONES DEL VEHÍCULO', { bold: true, size: 14 });
+  pdf.addText('');
+  
+  const observationText = inspection.observations || 'Sin observaciones registradas';
+  pdf.addText(observationText, { size: 12 });
+  pdf.addText('');
+  pdf.addText('');
+  pdf.addText('');
+  
+  // Footer exacto como en la imagen
+  pdf.addText('Grúas 5 Norte - Panamericana Norte Km. 841, Copiapó', { size: 10 });
+  pdf.addText('Tel: +56 9 62380627 | Email: asistencia@gruas5norte.cl', { size: 10 });
 
   return pdf.getBlob();
 }
