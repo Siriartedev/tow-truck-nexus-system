@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,12 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				// Custom green gradient colors
+				'green-light': 'hsl(var(--green-light))',
+				'green-medium': 'hsl(var(--green-medium))',
+				'green-dark': 'hsl(var(--green-dark))',
+				'green-darker': 'hsl(var(--green-darker))'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -89,6 +95,10 @@ export default {
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out'
+			},
+			backgroundImage: {
+				'gradient-green': 'linear-gradient(135deg, hsl(var(--green-light)), hsl(var(--green-dark)))',
+				'gradient-green-hover': 'linear-gradient(135deg, hsl(var(--green-medium)), hsl(var(--green-darker)))'
 			}
 		}
 	},

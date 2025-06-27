@@ -45,10 +45,10 @@ export default function MainLayout() {
         sidebarOpen ? "block" : "hidden"
       )}>
         <div className="fixed inset-0 bg-black/50" onClick={() => setSidebarOpen(false)} />
-        <div className="fixed left-0 top-0 h-full w-64 bg-white shadow-lg">
-          <div className="flex items-center justify-between p-4 border-b">
-            <h2 className="text-xl font-bold text-green-600">TMS Grúas</h2>
-            <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(false)}>
+        <div className="fixed left-0 top-0 h-full w-64 bg-gradient-green shadow-lg">
+          <div className="flex items-center justify-between p-4 border-b border-green-darker/20">
+            <h2 className="text-xl font-bold text-white">TMS Grúas</h2>
+            <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(false)} className="text-white hover:bg-green-darker/20">
               <X className="h-6 w-6" />
             </Button>
           </div>
@@ -60,10 +60,10 @@ export default function MainLayout() {
                   key={item.href}
                   to={item.href}
                   className={cn(
-                    "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                    "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors mb-1",
                     location.pathname === item.href
-                      ? "bg-green-100 text-green-700"
-                      : "text-gray-600 hover:bg-gray-100"
+                      ? "bg-white/20 text-white backdrop-blur-sm"
+                      : "text-white/80 hover:bg-white/10 hover:text-white"
                   )}
                   onClick={() => setSidebarOpen(false)}
                 >
@@ -77,9 +77,9 @@ export default function MainLayout() {
       </div>
 
       {/* Desktop sidebar */}
-      <div className="hidden lg:fixed lg:left-0 lg:top-0 lg:h-full lg:w-64 lg:bg-white lg:shadow-lg lg:block">
-        <div className="p-6 border-b">
-          <h2 className="text-2xl font-bold text-green-600">TMS Grúas</h2>
+      <div className="hidden lg:fixed lg:left-0 lg:top-0 lg:h-full lg:w-64 lg:bg-gradient-green lg:shadow-lg lg:block">
+        <div className="p-6 border-b border-green-darker/20">
+          <h2 className="text-2xl font-bold text-white">TMS Grúas</h2>
         </div>
         <nav className="p-4">
           {sidebarItems.map((item) => {
@@ -91,8 +91,8 @@ export default function MainLayout() {
                 className={cn(
                   "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors mb-1",
                   location.pathname === item.href
-                    ? "bg-green-100 text-green-700"
-                    : "text-gray-600 hover:bg-gray-100"
+                    ? "bg-white/20 text-white backdrop-blur-sm"
+                    : "text-white/80 hover:bg-white/10 hover:text-white"
                 )}
               >
                 <Icon className="h-5 w-5" />
@@ -111,19 +111,19 @@ export default function MainLayout() {
             <Button
               variant="ghost"
               size="icon"
-              className="lg:hidden"
+              className="lg:hidden text-green-dark hover:bg-green-light/20"
               onClick={() => setSidebarOpen(true)}
             >
               <Menu className="h-6 w-6" />
             </Button>
             <div className="flex items-center space-x-4">
               <Link to="/portal-operator">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="border-green-medium text-green-dark hover:bg-green-light/20">
                   Portal Operador
                 </Button>
               </Link>
               <Link to="/portal-client">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="border-green-medium text-green-dark hover:bg-green-light/20">
                   Portal Cliente
                 </Button>
               </Link>
