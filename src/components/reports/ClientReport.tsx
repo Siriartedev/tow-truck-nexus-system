@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -52,9 +53,9 @@ export default function ClientReport() {
       folio: 'SVC-20241201-001',
       client_name: 'Constructora ABC',
       service_type: 'Montaje Industrial',
-      crane_brand: 'Liebherr',
-      crane_model: 'LTM 1090-4.2',
-      crane_license_plate: 'GRUA-001',
+      vehicle_brand: 'Mercedes-Benz',
+      vehicle_model: 'Actros 3344',
+      license_plate: 'HJKL-56',
       origin: 'Bodega Central, Santiago',
       destination: 'Obra Torre Norte, Las Condes',
       observations: 'Montaje de estructura de acero, requiere coordinar con obra civil',
@@ -68,9 +69,9 @@ export default function ClientReport() {
       folio: 'SVC-20241203-005',
       client_name: 'Constructora ABC',
       service_type: 'Transporte Especial',
-      crane_brand: 'Tadano',
-      crane_model: 'ATF 70G-4',
-      crane_license_plate: 'GRUA-003',
+      vehicle_brand: 'Volvo',
+      vehicle_model: 'FH16 750',
+      license_plate: 'MNOP-78',
       origin: 'Planta Providencia, Santiago',
       destination: 'Sitio Construcción, Maipú',
       observations: 'Transporte de prefabricados hormigón, carga frágil',
@@ -84,9 +85,9 @@ export default function ClientReport() {
       folio: 'SVC-20241207-012',
       client_name: 'Constructora ABC',
       service_type: 'Montaje Industrial',
-      crane_brand: 'Liebherr',
-      crane_model: 'LTM 1090-4.2',
-      crane_license_plate: 'GRUA-001',
+      vehicle_brand: 'Scania',
+      vehicle_model: 'R450',
+      license_plate: 'QRST-90',
       origin: 'Depósito San Bernardo',
       destination: 'Proyecto Residencial, Puente Alto',
       observations: 'Instalación de paneles prefabricados, trabajo en altura',
@@ -330,7 +331,7 @@ export default function ClientReport() {
                       <TableHead>Folio</TableHead>
                       <TableHead>Fecha</TableHead>
                       <TableHead>Tipo</TableHead>
-                      <TableHead>Grúa</TableHead>
+                      <TableHead>Vehículo</TableHead>
                       <TableHead>Marca/Modelo</TableHead>
                       <TableHead>Patente</TableHead>
                       <TableHead>Origen</TableHead>
@@ -347,9 +348,9 @@ export default function ClientReport() {
                         <TableCell className="font-medium">{service.folio}</TableCell>
                         <TableCell>{new Date(service.service_date).toLocaleDateString('es-ES')}</TableCell>
                         <TableCell>{service.service_type}</TableCell>
-                        <TableCell>{service.crane_brand}</TableCell>
-                        <TableCell>{service.crane_model}</TableCell>
-                        <TableCell className="font-mono text-xs">{service.crane_license_plate}</TableCell>
+                        <TableCell>{service.vehicle_brand}</TableCell>
+                        <TableCell>{service.vehicle_model}</TableCell>
+                        <TableCell className="font-mono text-xs">{service.license_plate}</TableCell>
                         <TableCell className="max-w-32 truncate" title={service.origin}>
                           {service.origin}
                         </TableCell>
