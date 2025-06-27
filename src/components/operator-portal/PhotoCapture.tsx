@@ -73,7 +73,8 @@ export default function PhotoCapture({ inspection, onUpdate, onNext, onPrevious 
 
   const requiredPhotos = PHOTO_TYPES.filter(t => t.required);
   const optionalPhotos = PHOTO_TYPES.filter(t => !t.required);
-  const hasRequiredPhotos = requiredPhotos.every(type => getPhotoForType(type.id));
+  // Changed: Only require minimum 1 photo total, not all required photos
+  const hasMinimumPhotos = inspection.photos.filter(p => p.file).length >= 1;
 
   return (
     <div className="space-y-6">
@@ -85,7 +86,7 @@ export default function PhotoCapture({ inspection, onUpdate, onNext, onPrevious 
             <span>Captura de Fotografías</span>
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            Toma fotografías del vehículo desde diferentes ángulos. Las marcadas como requeridas son obligatorias.
+            Toma al menos 1 fotografía del vehículo. Las marcadas como requeridas son recomendadas.
           </p>
         </CardHeader>
         <CardContent>
@@ -94,14 +95,14 @@ export default function PhotoCapture({ inspection, onUpdate, onNext, onPrevious 
               Fotos tomadas: {inspection.photos.length} de {PHOTO_TYPES.length}
             </div>
             <div className="flex items-center space-x-2">
-              {hasRequiredPhotos ? (
+              {hasMinimumPhotos ? (
                 <Badge variant="secondary" className="bg-green-100 text-green-800">
                   <CheckCircle className="h-3 w-3 mr-1" />
-                  Fotos requeridas completas
+                  Mínimo de fotos completo
                 </Badge>
               ) : (
                 <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
-                  Faltan fotos requeridas
+                  Se requiere al menos 1 foto
                 </Badge>
               )}
             </div>
@@ -112,7 +113,7 @@ export default function PhotoCapture({ inspection, onUpdate, onNext, onPrevious 
       {/* Required Photos */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Fotografías Requeridas</CardTitle>
+          <CardTitle className="text-lg">Fotografías Recomendadas</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -122,7 +123,7 @@ export default function PhotoCapture({ inspection, onUpdate, onNext, onPrevious 
                 <div key={photoType.id} className="border rounded-lg p-4">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="font-medium">{photoType.name}</h3>
-                    <Badge variant="destructive" className="text-xs">Requerida</Badge>
+                    <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-800">Recomendada</Badge>
                   </div>
                   
                   {existingPhoto ? (
@@ -246,7 +247,7 @@ export default function PhotoCapture({ inspection, onUpdate, onNext, onPrevious 
         <Button 
           onClick={onNext} 
           size="lg" 
-          disabled={!hasRequiredPhotos}
+          disabled={!hasMinimumPhotos}
           className="flex items-center space-x-2"
         >
           <span>Continuar a Firmas</span>
