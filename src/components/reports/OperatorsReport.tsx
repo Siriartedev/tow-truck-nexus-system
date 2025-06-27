@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,6 +9,9 @@ import {
   Download,
   TrendingUp
 } from 'lucide-react';
+import { toast } from 'sonner';
+import { usePDFGenerator } from '@/hooks/usePDFGenerator';
+import type { OperatorReportData } from '@/types/reports';
 
 export default function OperatorsReport() {
   const operatorsData = [
@@ -31,6 +33,26 @@ export default function OperatorsReport() {
     }
   ];
 
+  const { generateOperatorsReport } = usePDFGenerator();
+
+  const mockOperatorsReportData: OperatorReportData[] = operatorsData.map(op => ({
+    operator_id: op.id,
+    operator_name: op.name,
+    services_count: op.services,
+    total_commissions: op.commissions,
+    total_revenue: op.commissions * 10,
+    performance_rating: op.rating
+  }));
+
+  const exportReport = async () => {
+    try {
+      await generateOperatorsReport(mockOperatorsReportData);
+    } catch (error) {
+      console.error('Error exporting operators report:', error);
+      toast.error('Error al exportar el reporte de operadores');
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -38,7 +60,7 @@ export default function OperatorsReport() {
           <h3 className="text-2xl font-bold text-foreground">Reporte de Operadores</h3>
           <p className="text-muted-foreground">Desempeño y comisiones de operadores</p>
         </div>
-        <Button variant="outline">
+        <Button variant="outline" onClick={exportReport}>
           <Download className="h-4 w-4 mr-2" />
           Exportar
         </Button>

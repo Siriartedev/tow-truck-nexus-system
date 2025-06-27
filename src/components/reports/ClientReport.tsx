@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,6 +20,8 @@ import {
   Filter
 } from 'lucide-react';
 import type { ClientReportData, ServiceReportItem, ReportFilters } from '@/types/reports';
+import { usePDFGenerator } from '@/hooks/usePDFGenerator';
+import { toast } from 'sonner';
 
 export default function ClientReport() {
   const [filters, setFilters] = useState<ReportFilters>({
@@ -31,6 +32,9 @@ export default function ClientReport() {
   const [dateTo, setDateTo] = useState<Date>(new Date());
   const [selectedClient, setSelectedClient] = useState<string>('');
   const [reportData, setReportData] = useState<ClientReportData | null>(null);
+
+  // Agregar el hook de generación de PDFs
+  const { generateClientReport } = usePDFGenerator();
 
   // Mock data - clientes disponibles
   const availableClients = [
@@ -132,9 +136,21 @@ export default function ClientReport() {
     );
   };
 
-  const exportReport = () => {
-    console.log('Exportando reporte...', reportData);
-    // Aquí implementarías la lógica de exportación
+  const exportReport = async () => {
+    if (!reportData) {
+      toast.error('No hay datos para exportar');
+      return;
+    }
+    
+    try {
+      await generateClientReport(reportData, {
+        date_from: filters.date_from,
+        date_to: filters.date_to
+      });
+    } catch (error) {
+      console.error('Error exporting report:', error);
+      toast.error('Error al exportar el reporte');
+    }
   };
 
   return (

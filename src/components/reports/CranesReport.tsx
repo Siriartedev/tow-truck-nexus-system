@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,6 +9,9 @@ import {
   Download,
   Gauge
 } from 'lucide-react';
+import { usePDFGenerator } from '@/hooks/usePDFGenerator';
+import { toast } from 'sonner';
+import type { CraneReportData } from '@/types/reports';
 
 export default function CranesReport() {
   const cranesData = [
@@ -35,6 +37,29 @@ export default function CranesReport() {
     }
   ];
 
+  // Agregar el hook de generación de PDFs
+  const { generateCranesReport } = usePDFGenerator();
+
+  // Convertir datos para el reporte
+  const mockCranesReportData: CraneReportData[] = cranesData.map(crane => ({
+    crane_id: crane.id,
+    crane_identifier: crane.identifier,
+    brand: crane.brand,
+    model: crane.model,
+    services_count: crane.services,
+    utilization_percentage: crane.utilization,
+    total_revenue: crane.revenue
+  }));
+
+  const exportReport = async () => {
+    try {
+      await generateCranesReport(mockCranesReportData);
+    } catch (error) {
+      console.error('Error exporting cranes report:', error);
+      toast.error('Error al exportar el reporte de grúas');
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -42,7 +67,7 @@ export default function CranesReport() {
           <h3 className="text-2xl font-bold text-foreground">Reporte de Grúas</h3>
           <p className="text-muted-foreground">Utilización y rendimiento del equipo</p>
         </div>
-        <Button variant="outline">
+        <Button variant="outline" onClick={exportReport}>
           <Download className="h-4 w-4 mr-2" />
           Exportar
         </Button>

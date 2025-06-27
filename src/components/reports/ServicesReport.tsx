@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,6 +11,8 @@ import {
   AlertTriangle,
   Download
 } from 'lucide-react';
+import { usePDFGenerator } from '@/hooks/usePDFGenerator';
+import { ServiceReportItem } from '@/types';
 
 export default function ServicesReport() {
   // Mock data
@@ -38,6 +39,57 @@ export default function ServicesReport() {
     // Más servicios...
   ];
 
+  // Agregar el hook de generación de PDFs
+  const { generateServicesReport } = usePDFGenerator();
+
+  // Mock data expandido para el reporte
+  const mockServicesData: ServiceReportItem[] = [
+    {
+      id: '1',
+      folio: 'SVC-20241220-001',
+      client_name: 'Constructora ABC',
+      service_type: 'Montaje Industrial',
+      crane_brand: 'Liebherr',
+      crane_model: 'LTM 1090-4.2',
+      crane_license_plate: 'GRUA-001',
+      origin: 'Bodega Central, Santiago',
+      destination: 'Obra Torre Norte, Las Condes',
+      observations: 'Montaje exitoso',
+      service_date: '2024-12-20',
+      status: 'completed' as const,
+      amount: 450000,
+      operator_name: 'Juan Pérez'
+    },
+    {
+      id: '2',
+      folio: 'SVC-20241219-002',
+      client_name: 'Transportes XYZ',
+      service_type: 'Transporte Especial',
+      crane_brand: 'Tadano',
+      crane_model: 'ATF 70G-4',
+      crane_license_plate: 'GRUA-002',
+      origin: 'Puerto Valparaíso',
+      destination: 'Planta Industrial, Santiago',
+      observations: 'Transporte completado sin incidentes',
+      service_date: '2024-12-19',
+      status: 'completed' as const,
+      amount: 320000,
+      operator_name: 'Carlos López'
+    }
+  ];
+
+  const exportReport = async () => {
+    try {
+      await generateServicesReport(mockServicesData, {
+        date_from: '2024-12-01',
+        date_to: new Date().toISOString().split('T')[0]
+      });
+    } catch (error) {
+      console.error('Error exporting services report:', error);
+      toast.error('Error al exportar el reporte de servicios');
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -46,7 +98,7 @@ export default function ServicesReport() {
           <h3 className="text-2xl font-bold text-foreground">Reporte de Servicios</h3>
           <p className="text-muted-foreground">Vista general de todos los servicios</p>
         </div>
-        <Button variant="outline">
+        <Button variant="outline" onClick={exportReport}>
           <Download className="h-4 w-4 mr-2" />
           Exportar
         </Button>

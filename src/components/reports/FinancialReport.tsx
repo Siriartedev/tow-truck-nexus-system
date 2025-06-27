@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,6 +8,9 @@ import {
   Download,
   Calculator
 } from 'lucide-react';
+import { toast } from 'sonner';
+import { usePDFGenerator } from '@/hooks/usePDFGenerator';
+import type { FinancialReportData } from '@/types/reports';
 
 export default function FinancialReport() {
   const financialData = {
@@ -20,6 +22,27 @@ export default function FinancialReport() {
     profitMargin: 89.2
   };
 
+  // Agregar el hook de generación de PDFs
+  const { generateFinancialReport } = usePDFGenerator();
+
+  const exportReport = async () => {
+    try {
+      const reportData: FinancialReportData = {
+        period: 'Diciembre 2024',
+        total_revenue: financialData.totalRevenue,
+        total_commissions: financialData.totalCommissions,
+        net_profit: financialData.netProfit,
+        services_count: 156,
+        clients_count: 45
+      };
+
+      await generateFinancialReport(reportData);
+    } catch (error) {
+      console.error('Error exporting financial report:', error);
+      toast.error('Error al exportar el reporte financiero');
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -27,7 +50,7 @@ export default function FinancialReport() {
           <h3 className="text-2xl font-bold text-foreground">Reporte Financiero</h3>
           <p className="text-muted-foreground">Análisis de ingresos y rentabilidad</p>
         </div>
-        <Button variant="outline">
+        <Button variant="outline" onClick={exportReport}>
           <Download className="h-4 w-4 mr-2" />
           Exportar
         </Button>

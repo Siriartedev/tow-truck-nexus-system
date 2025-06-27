@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,11 +19,21 @@ import ServicesReport from '@/components/reports/ServicesReport';
 import FinancialReport from '@/components/reports/FinancialReport';
 import OperatorsReport from '@/components/reports/OperatorsReport';
 import CranesReport from '@/components/reports/CranesReport';
+import { usePDFGenerator } from '@/hooks/usePDFGenerator';
 
 type ReportType = 'client' | 'services' | 'financial' | 'operators' | 'cranes' | 'dashboard';
 
 export default function Reports() {
   const [activeReport, setActiveReport] = useState<ReportType>('dashboard');
+
+  // Agregar el hook de generación de PDFs
+  const { 
+    generateClientReport, 
+    generateServicesReport, 
+    generateFinancialReport, 
+    generateOperatorsReport, 
+    generateCranesReport 
+  } = usePDFGenerator();
 
   // Mock data para el dashboard
   const dashboardStats = {
@@ -76,6 +85,37 @@ export default function Reports() {
     }
   ];
 
+  // Función para exportar reporte completo
+  const exportAllReports = async () => {
+    try {
+      toast.info('Generando reporte completo...');
+      
+      // Generar todos los reportes con datos mock
+      const promises = [
+        generateFinancialReport({
+          period: 'Diciembre 2024',
+          total_revenue: dashboardStats.totalRevenue,
+          total_commissions: dashboardStats.totalRevenue * 0.1,
+          net_profit: dashboardStats.totalRevenue * 0.9,
+          services_count: dashboardStats.monthlyServices,
+          clients_count: dashboardStats.activeClients
+        }),
+        generateServicesReport([], {
+          date_from: '2024-12-01',
+          date_to: new Date().toISOString().split('T')[0]
+        }),
+        generateOperatorsReport([]),
+        generateCranesReport([])
+      ];
+      
+      await Promise.all(promises);
+      toast.success('Todos los reportes han sido generados');
+    } catch (error) {
+      console.error('Error generating all reports:', error);
+      toast.error('Error al generar los reportes');
+    }
+  };
+
   const renderActiveReport = () => {
     switch (activeReport) {
       case 'client':
@@ -104,7 +144,11 @@ export default function Reports() {
           </p>
         </div>
         <div className="flex space-x-3">
-          <Button variant="outline" className="border-green-medium hover:bg-green-dark/10">
+          <Button 
+            variant="outline" 
+            className="border-green-medium hover:bg-green-dark/10"
+            onClick={exportAllReports}
+          >
             <Download className="h-4 w-4 mr-2" />
             Exportar Todo
           </Button>
