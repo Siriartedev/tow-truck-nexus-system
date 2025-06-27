@@ -12,7 +12,8 @@ import {
   UserCheck,
   Download,
   Calendar,
-  Building
+  Building,
+  ArrowLeft
 } from 'lucide-react';
 import ClientReport from '@/components/reports/ClientReport';
 import ServicesReport from '@/components/reports/ServicesReport';
@@ -259,17 +260,21 @@ export default function Reports() {
   return (
     <div className="space-y-6">
       {activeReport !== 'dashboard' && (
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-4 pb-4 border-b border-border/50">
           <Button 
             variant="outline" 
             onClick={() => setActiveReport('dashboard')}
             className="border-green-medium text-green-dark hover:bg-green-light/20"
           >
-            ← Volver al Dashboard
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Volver a Reportes
           </Button>
-          <h2 className="text-2xl font-bold text-foreground">
-            {reportTypes.find(r => r.id === activeReport)?.name || 'Reporte'}
-          </h2>
+          <div className="flex items-center space-x-2">
+            <BarChart3 className="h-5 w-5 text-green-medium" />
+            <h2 className="text-2xl font-bold text-foreground">
+              {reportTypes.find(r => r.id === activeReport)?.name || 'Reporte'}
+            </h2>
+          </div>
         </div>
       )}
       
