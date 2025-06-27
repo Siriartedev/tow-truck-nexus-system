@@ -31,9 +31,9 @@ export class PDFGenerator {
     operatorName: string, 
     clientName: string
   ): void {
-    const signatureWidth = 45;
-    const signatureHeight = 25;
-    const spacing = 20;
+    const signatureWidth = 40; // Reducido un poco
+    const signatureHeight = 20; // Reducido un poco
+    const spacing = 30; // Más espacio entre firmas
     
     // Calcular posiciones para centrar las firmas
     const totalWidth = (signatureWidth * 2) + spacing;
@@ -56,7 +56,7 @@ export class PDFGenerator {
     
     this.yPosition += 8;
     
-    // Agregar las firmas
+    // Agregar las firmas reales capturadas
     if (operatorSignature) {
       try {
         this.doc.addImage(operatorSignature, 'PNG', operatorX, this.yPosition, signatureWidth, signatureHeight);
@@ -97,18 +97,11 @@ export class PDFGenerator {
     
     this.yPosition += 5;
     
-    // Nombres
-    this.doc.setFontSize(12);
+    // Solo los nombres, sin texto adicional
+    this.doc.setFontSize(11);
     this.doc.setFont('helvetica', 'normal');
     this.doc.text(operatorName, operatorX, this.yPosition);
     this.doc.text(clientName, clientX, this.yPosition);
-    
-    this.yPosition += 6;
-    
-    // Roles
-    this.doc.setFontSize(10);
-    this.doc.text('Operador de Grúa', operatorX, this.yPosition);
-    this.doc.text('Cliente', clientX, this.yPosition);
     
     this.yPosition += 10;
   }

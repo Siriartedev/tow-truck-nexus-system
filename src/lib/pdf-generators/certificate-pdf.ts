@@ -106,7 +106,7 @@ export async function generateCertificatePDF(
   pdf.addText(`Porcentaje de completitud: ${percentage}%`, { bold: true, size: 12 });
   pdf.addText('');
   
-  // SET FOTOGRÁFICO - Con fotografías reales
+  // SET FOTOGRÁFICO - Con fotografías reales procesadas asíncronamente
   pdf.addText('SET FOTOGRÁFICO', { bold: true, size: 14 });
   pdf.addText('');
   
@@ -152,7 +152,7 @@ export async function generateCertificatePDF(
   pdf.addText(`Set fotográfico: ${photosWithFiles.length} fotografías procesadas`, { bold: true, size: 12 });
   pdf.addText('');
   
-  // OBSERVACIONES DEL VEHÍCULO
+  // OBSERVACIONES DEL VEHÍCULO - Simplificadas
   pdf.addText('OBSERVACIONES DEL VEHÍCULO', { bold: true, size: 14 });
   pdf.addText('');
   
@@ -160,11 +160,11 @@ export async function generateCertificatePDF(
   pdf.addText(observationText, { size: 12 });
   pdf.addText('');
   
-  // FIRMAS DIGITALES - Posicionadas una al lado de la otra
+  // FIRMAS DIGITALES - Posicionadas lado a lado con firmas reales
   pdf.addText('FIRMAS DIGITALES', { bold: true, size: 14 });
   pdf.addText('');
   
-  // Posicionar las firmas horizontalmente
+  // Posicionar las firmas horizontalmente con las firmas reales capturadas
   pdf.addSideBySideSignatures(
     inspection.signatures.operator,
     inspection.signatures.client,

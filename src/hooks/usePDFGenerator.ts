@@ -1,3 +1,4 @@
+
 import { toast } from 'sonner';
 import { generateInvoicePDF } from '@/lib/pdf-generators/invoice-pdf';
 import { generateServiceReportPDF } from '@/lib/pdf-generators/service-report-pdf';
@@ -48,6 +49,7 @@ export function usePDFGenerator() {
   const generateCertificate = async (service: Service, inspection: ServiceInspection, companyConfig?: CompanyConfig) => {
     try {
       toast.info('Generando certificado...');
+      // Manejar correctamente el proceso asíncrono
       const blob = await generateCertificatePDF(service, inspection, companyConfig);
       const filename = `Certificado_${service.folio}_${service.client_name.replace(/\s+/g, '_')}.pdf`;
       downloadBlob(blob, filename);
