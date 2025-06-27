@@ -14,6 +14,7 @@ import Cranes from "./pages/Cranes";
 import Operators from "./pages/Operators";
 import Costs from "./pages/Costs";
 import Calendar from "./pages/Calendar";
+import Closures from "./pages/Closures";
 import ClientPortal from "./pages/ClientPortal";
 import NotFound from "./pages/NotFound";
 
@@ -35,8 +36,8 @@ const App = () => (
               <Route path="cranes" element={<Cranes />} />
               <Route path="operators" element={<Operators />} />
               <Route path="calendar" element={<Calendar />} />
+              <Route path="closures" element={<Closures />} />
               {/* Placeholder routes for other modules */}
-              <Route path="closures" element={<div className="p-6"><h1 className="text-2xl font-bold">Cierres</h1><p>Módulo en construcción...</p></div>} />
               <Route path="invoices" element={<div className="p-6"><h1 className="text-2xl font-bold">Facturas</h1><p>Módulo en construcción...</p></div>} />
               <Route path="costs" element={<Costs />} />
               <Route path="reports" element={<div className="p-6"><h1 className="text-2xl font-bold">Reportes</h1><p>Módulo en construcción...</p></div>} />
