@@ -14,6 +14,7 @@ import Cranes from "./pages/Cranes";
 import Operators from "./pages/Operators";
 import Costs from "./pages/Costs";
 import Calendar from "./pages/Calendar";
+import ClientPortal from "./pages/ClientPortal";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,8 +42,9 @@ const App = () => (
               <Route path="reports" element={<div className="p-6"><h1 className="text-2xl font-bold">Reportes</h1><p>Módulo en construcción...</p></div>} />
               <Route path="configuration" element={<div className="p-6"><h1 className="text-2xl font-bold">Configuración</h1><p>Módulo en construcción...</p></div>} />
               <Route path="portal-operator" element={<div className="p-6"><h1 className="text-2xl font-bold">Portal del Operador</h1><p>Módulo en construcción...</p></div>} />
-              <Route path="portal-client" element={<div className="p-6"><h1 className="text-2xl font-bold">Portal del Cliente</h1><p>Módulo en construcción...</p></div>} />
             </Route>
+            {/* Client Portal - standalone route */}
+            <Route path="portal-client" element={<ClientPortal />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
