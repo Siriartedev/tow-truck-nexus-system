@@ -71,6 +71,42 @@ export class PDFGenerator {
     });
   }
 
+  addImage(imageData: string, width: number = 50, height: number = 30): void {
+    try {
+      if (this.yPosition + height > this.pageHeight - 30) {
+        this.doc.addPage();
+        this.yPosition = 20;
+      }
+      
+      // Determinar el formato de imagen
+      let format = 'JPEG';
+      if (imageData.includes('data:image/png')) {
+        format = 'PNG';
+      }
+      
+      this.doc.addImage(imageData, format, this.margin, this.yPosition, width, height);
+      this.yPosition += height + 5;
+    } catch (error) {
+      console.error('Error adding image to PDF:', error);
+      this.addText('[ERROR AL PROCESAR IMAGEN]', { size: 10 });
+    }
+  }
+
+  addSignature(signatureData: string, width: number = 60, height: number = 30): void {
+    try {
+      if (this.yPosition + height > this.pageHeight - 30) {
+        this.doc.addPage();
+        this.yPosition = 20;
+      }
+      
+      this.doc.addImage(signatureData, 'PNG', this.margin, this.yPosition, width, height);
+      this.yPosition += height + 5;
+    } catch (error) {
+      console.error('Error adding signature to PDF:', error);
+      this.addText('[ERROR AL PROCESAR FIRMA]', { size: 10 });
+    }
+  }
+
   addTable(headers: string[], rows: string[][]): void {
     const startY = this.yPosition;
     const colWidth = (this.pageWidth - this.margin * 2) / headers.length;

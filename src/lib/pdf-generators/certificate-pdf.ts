@@ -15,13 +15,6 @@ export function generateCertificatePDF(service: Service, inspection: ServiceInsp
   pdf.addText('REPORTE DE INSPECCIÓN PRE-SERVICIO', { bold: true, size: 18 });
   pdf.addText('');
   
-  // Información de la empresa
-  pdf.addText('Grúas 5 Norte', { bold: true, size: 14 });
-  pdf.addText('RUT: 76.769.841-0', { size: 12 });
-  pdf.addText('Panamericana Norte Km. 841, Copiapó', { size: 12 });
-  pdf.addText('Tel: +56 9 62380627 | Email: asistencia@gruas5norte.cl', { size: 12 });
-  pdf.addText('');
-  
   pdf.addHorizontalLine();
   
   // Información del documento (folio y fecha de generación)
@@ -86,7 +79,7 @@ export function generateCertificatePDF(service: Service, inspection: ServiceInsp
   pdf.addText('');
   pdf.addText('');
   
-  // SET FOTOGRÁFICO - Con fotografías reales y información detallada
+  // SET FOTOGRÁFICO - Con fotografías reales mostradas
   pdf.addText('SET FOTOGRÁFICO', { bold: true, size: 14 });
   pdf.addText('');
   
@@ -102,6 +95,19 @@ export function generateCertificatePDF(service: Service, inspection: ServiceInsp
       pdf.addText(`${index + 1}. Foto ${photoType} - ${dateStr} ${timeStr}`, { bold: true, size: 12 });
       pdf.addText(`   Archivo: ${photo.file?.name || 'foto_' + photo.type + '.jpg'}`, { size: 10 });
       pdf.addText(`   Tamaño: ${photo.file ? Math.round(photo.file.size / 1024) + ' KB' : 'N/A'}`, { size: 10 });
+      
+      // Agregar la imagen real al PDF si existe
+      if (photo.file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const imgData = e.target?.result as string;
+          if (imgData) {
+            pdf.addImage(imgData, 50, 30);
+          }
+        };
+        reader.readAsDataURL(photo.file);
+      }
+      
       pdf.addText('');
     });
   } else {
@@ -113,7 +119,7 @@ export function generateCertificatePDF(service: Service, inspection: ServiceInsp
   pdf.addText('');
   pdf.addText('');
   
-  // OBSERVACIONES DEL VEHÍCULO - Sin símbolos extraños
+  // OBSERVACIONES DEL VEHÍCULO - Solo texto capturado
   pdf.addText('OBSERVACIONES DEL VEHÍCULO', { bold: true, size: 14 });
   pdf.addText('');
   
@@ -123,15 +129,9 @@ export function generateCertificatePDF(service: Service, inspection: ServiceInsp
   
   pdf.addText(cleanObservations, { size: 12 });
   pdf.addText('');
-  pdf.addText('_'.repeat(80), { size: 8 });
-  pdf.addText('');
-  pdf.addText('_'.repeat(80), { size: 8 });
-  pdf.addText('');
-  pdf.addText('_'.repeat(80), { size: 8 });
-  pdf.addText('');
   pdf.addText('');
   
-  // FIRMAS DIGITALES - Con firmas reales capturadas
+  // FIRMAS DIGITALES - Con firmas reales mostradas
   pdf.addText('FIRMAS DIGITALES', { bold: true, size: 14 });
   pdf.addText('');
   
@@ -142,7 +142,9 @@ export function generateCertificatePDF(service: Service, inspection: ServiceInsp
   if (inspection.signatures.operator) {
     const operatorSignatureDate = new Date();
     pdf.addText(`Firma capturada digitalmente el ${operatorSignatureDate.toLocaleDateString('es-ES')} a las ${operatorSignatureDate.toLocaleTimeString('es-ES')}`, { size: 10, bold: true });
-    pdf.addText('[FIRMA DIGITAL PRESENTE EN EL SISTEMA]', { size: 10 });
+    
+    // Agregar la firma real del operador
+    pdf.addSignature(inspection.signatures.operator, 60, 30);
   } else {
     pdf.addText('[SIN FIRMA CAPTURADA]', { size: 10 });
   }
@@ -160,7 +162,9 @@ export function generateCertificatePDF(service: Service, inspection: ServiceInsp
   if (inspection.signatures.client) {
     const clientSignatureDate = new Date();
     pdf.addText(`Firma capturada digitalmente el ${clientSignatureDate.toLocaleDateString('es-ES')} a las ${clientSignatureDate.toLocaleTimeString('es-ES')}`, { size: 10, bold: true });
-    pdf.addText('[FIRMA DIGITAL PRESENTE EN EL SISTEMA]', { size: 10 });
+    
+    // Agregar la firma real del cliente
+    pdf.addSignature(inspection.signatures.client, 60, 30);
   } else {
     pdf.addText('[SIN FIRMA CAPTURADA]', { size: 10 });
   }
