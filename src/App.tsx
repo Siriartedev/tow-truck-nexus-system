@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,6 +18,7 @@ import Closures from "./pages/Closures";
 import ClientPortal from "./pages/ClientPortal";
 import NotFound from "./pages/NotFound";
 import Invoices from "./pages/Invoices";
+import Reports from "./pages/Reports";
 
 const queryClient = new QueryClient();
 
@@ -39,7 +41,7 @@ const App = () => (
               <Route path="closures" element={<Closures />} />
               <Route path="invoices" element={<Invoices />} />
               <Route path="costs" element={<Costs />} />
-              <Route path="reports" element={<div className="p-6"><h1 className="text-2xl font-bold">Reportes</h1><p>Módulo en construcción...</p></div>} />
+              <Route path="reports" element={<Reports />} />
               <Route path="configuration" element={<div className="p-6"><h1 className="text-2xl font-bold">Configuración</h1><p>Módulo en construcción...</p></div>} />
               <Route path="portal-operator" element={<div className="p-6"><h1 className="text-2xl font-bold">Portal del Operador</h1><p>Módulo en construcción...</p></div>} />
             </Route>
