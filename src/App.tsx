@@ -10,6 +10,8 @@ import Dashboard from "./pages/Dashboard";
 import Services from "./pages/Services";
 import ServiceTypes from "./pages/ServiceTypes";
 import Clients from "./pages/Clients";
+import Cranes from "./pages/Cranes";
+import Operators from "./pages/Operators";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,9 +29,9 @@ const App = () => (
               <Route path="services" element={<Services />} />
               <Route path="service-types" element={<ServiceTypes />} />
               <Route path="clients" element={<Clients />} />
+              <Route path="cranes" element={<Cranes />} />
+              <Route path="operators" element={<Operators />} />
               {/* Placeholder routes for other modules */}
-              <Route path="cranes" element={<div className="p-6"><h1 className="text-2xl font-bold">Grúas</h1><p>Módulo en construcción...</p></div>} />
-              <Route path="operators" element={<div className="p-6"><h1 className="text-2xl font-bold">Operadores</h1><p>Módulo en construcción...</p></div>} />
               <Route path="closures" element={<div className="p-6"><h1 className="text-2xl font-bold">Cierres</h1><p>Módulo en construcción...</p></div>} />
               <Route path="invoices" element={<div className="p-6"><h1 className="text-2xl font-bold">Facturas</h1><p>Módulo en construcción...</p></div>} />
               <Route path="costs" element={<div className="p-6"><h1 className="text-2xl font-bold">Costos</h1><p>Módulo en construcción...</p></div>} />
