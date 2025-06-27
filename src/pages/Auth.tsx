@@ -43,10 +43,6 @@ export default function Auth() {
     
     setLoading(true);
     const { error } = await signIn(email, password);
-    
-    if (!error) {
-      // La redirección se maneja en el useEffect
-    }
     setLoading(false);
   };
 
@@ -59,21 +55,25 @@ export default function Auth() {
       name,
       role
     });
-    
-    if (!error) {
-      // La redirección se maneja en el useEffect
-    }
     setLoading(false);
   };
 
   // Quick login functions for demo accounts
   const quickLogin = async (demoEmail: string, demoPassword: string) => {
+    console.log('Quick login attempt for:', demoEmail);
     setLoading(true);
-    console.log('Attempting quick login for:', demoEmail);
+    
+    // Clear current form data
+    setEmail('');
+    setPassword('');
+    
     const { error } = await signIn(demoEmail, demoPassword);
+    
     if (error) {
-      console.error('Quick login failed:', error);
+      console.error('Quick login failed for', demoEmail, ':', error);
+      toast.error(`Error al acceder como ${demoEmail}: ${error.message}`);
     }
+    
     setLoading(false);
   };
 

@@ -39,6 +39,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const fetchUserProfile = async (userId: string) => {
+    try {
+      console.log('Fetching profile for user:', userId);
+      
+      const { data: profileData, error } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle();
+      
+      if (error) {
+        console.error('Error fetching profile:', error);
+        return null;
+      }
+
+      if (profileData) {
+        console.log('Profile found:', profileData);
+        return profileData;
+      }
+
+      console.log('No profile found, user might need to be created');
+      return null;
+    } catch (err) {
+      console.error('Profile fetch error:', err);
+      return null;
+    }
+  };
+
   useEffect(() => {
     let mounted = true;
 
@@ -52,62 +80,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(session?.user ?? null);
         
         if (session?.user && event !== 'SIGNED_OUT') {
-          // Fetch or create user profile
-          setTimeout(async () => {
-            if (!mounted) return;
-            
-            try {
-              // First try to get existing profile
-              const { data: profileData, error: fetchError } = await supabase
-                .from('user_profiles')
-                .select('*')
-                .eq('user_id', session.user.id)
-                .maybeSingle();
-              
-              if (fetchError) {
-                console.error('Error fetching profile:', fetchError);
-                toast.error('Error al cargar el perfil del usuario');
-                setLoading(false);
-                return;
-              }
-
-              if (profileData) {
-                console.log('Profile found:', profileData);
-                setProfile(profileData);
-              } else {
-                console.log('No profile found, creating one for:', session.user.email);
-                // Create profile if it doesn't exist
-                const { data: newProfile, error: createError } = await supabase
-                  .from('user_profiles')
-                  .insert({
-                    user_id: session.user.id,
-                    email: session.user.email || '',
-                    name: session.user.email?.split('@')[0] || 'Usuario',
-                    role: 'client'
-                  })
-                  .select()
-                  .single();
-                
-                if (createError) {
-                  console.error('Error creating profile:', createError);
-                  toast.error('Error al crear el perfil del usuario');
-                } else {
-                  console.log('Profile created:', newProfile);
-                  setProfile(newProfile);
-                  toast.success('Perfil creado exitosamente');
-                }
-              }
-            } catch (err) {
-              console.error('Profile operation error:', err);
-              toast.error('Error de conexión al cargar el perfil');
-            }
-            
-            setLoading(false);
-          }, 100);
+          // Fetch user profile
+          const profileData = await fetchUserProfile(session.user.id);
+          if (profileData) {
+            setProfile(profileData);
+          } else {
+            setProfile(null);
+            toast.error('No se encontró el perfil del usuario. Contacta al administrador.');
+          }
         } else {
           setProfile(null);
-          setLoading(false);
         }
+        
+        setLoading(false);
       }
     );
 
@@ -116,9 +101,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!mounted) return;
       
       console.log('Initial session check:', session?.user?.email);
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (!session) {
+      
+      if (session?.user) {
+        setSession(session);
+        setUser(session.user);
+        
+        // Fetch profile for existing session
+        fetchUserProfile(session.user.id).then(profileData => {
+          if (mounted) {
+            setProfile(profileData);
+            setLoading(false);
+          }
+        });
+      } else {
+        setSession(null);
+        setUser(null);
+        setProfile(null);
         setLoading(false);
       }
     });
@@ -194,7 +192,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
-      // Clear state immediately to prevent UI flickering
+      // Clear state first
       setUser(null);
       setProfile(null);
       setSession(null);
@@ -202,13 +200,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error('Sign out error:', error);
-        // Don't show error to user for sign out issues
       } else {
         toast.success('Sesión cerrada');
       }
     } catch (err) {
       console.error('Sign out error:', err);
-      // Don't show error to user for sign out issues
     }
   };
 
