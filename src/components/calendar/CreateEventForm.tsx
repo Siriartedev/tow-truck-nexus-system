@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -66,7 +65,24 @@ export default function CreateEventForm({ event, onClose, onSubmit }: CreateEven
   });
 
   const handleSubmit = (data: z.infer<typeof createEventSchema>) => {
-    onSubmit(data);
+    // Ensure all required fields are present before submitting
+    const eventData: CreateEventData = {
+      title: data.title,
+      description: data.description,
+      start_date: data.start_date,
+      end_date: data.end_date,
+      start_time: data.start_time,
+      end_time: data.end_time,
+      event_type: data.event_type,
+      priority: data.priority,
+      service_id: data.service_id,
+      client_id: data.client_id,
+      operator_id: data.operator_id,
+      crane_id: data.crane_id,
+      location: data.location,
+      all_day: data.all_day,
+    };
+    onSubmit(eventData);
   };
 
   const isAllDay = form.watch('all_day');
@@ -74,17 +90,17 @@ export default function CreateEventForm({ event, onClose, onSubmit }: CreateEven
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <CardTitle className="text-xl font-bold">
+      <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-card border-border">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b border-border">
+          <CardTitle className="text-xl font-bold text-foreground">
             {event ? 'Editar Evento' : 'Nuevo Evento'}
           </CardTitle>
-          <Button variant="ghost" size="icon" onClick={onClose}>
+          <Button variant="ghost" size="icon" onClick={onClose} className="text-muted-foreground hover:text-foreground">
             <X className="h-5 w-5" />
           </Button>
         </CardHeader>
         
-        <CardContent>
+        <CardContent className="p-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -397,11 +413,11 @@ export default function CreateEventForm({ event, onClose, onSubmit }: CreateEven
                 )}
               </div>
 
-              <div className="flex justify-end space-x-4 pt-6 border-t">
+              <div className="flex justify-end space-x-4 pt-6 border-t border-border">
                 <Button type="button" variant="outline" onClick={onClose}>
                   Cancelar
                 </Button>
-                <Button type="submit" className="bg-green-600 hover:bg-green-700">
+                <Button type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground">
                   {event ? 'Actualizar Evento' : 'Crear Evento'}
                 </Button>
               </div>

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { 
   Calendar as CalendarIcon,
   Plus,
@@ -97,20 +97,20 @@ export default function Calendar() {
 
   const getEventTypeColor = (type: string) => {
     switch (type) {
-      case 'service': return 'bg-green-100 text-green-800 border-green-200';
-      case 'maintenance': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'meeting': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'other': return 'bg-gray-100 text-gray-800 border-gray-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'service': return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800';
+      case 'maintenance': return 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-300 dark:border-yellow-800';
+      case 'meeting': return 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800';
+      case 'other': return 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700';
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'high': return 'bg-red-100 text-red-800';
-      case 'medium': return 'bg-yellow-100 text-yellow-800';
-      case 'low': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'high': return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300';
+      case 'medium': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300';
+      case 'low': return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
     }
   };
 
@@ -179,14 +179,14 @@ export default function Calendar() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Calendario</h1>
-          <p className="text-gray-600 mt-1">Gestiona eventos y servicios programados</p>
+          <h1 className="text-3xl font-bold text-foreground">Calendario</h1>
+          <p className="text-muted-foreground mt-1">Gestiona eventos y servicios programados</p>
         </div>
         <Button 
-          className="bg-green-600 hover:bg-green-700"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground"
           onClick={() => setShowCreateForm(true)}
         >
           <Plus className="h-4 w-4 mr-2" />
@@ -195,7 +195,7 @@ export default function Calendar() {
       </div>
 
       {/* Calendar Controls */}
-      <Card>
+      <Card className="bg-card border-border">
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center space-x-4">
@@ -204,6 +204,7 @@ export default function Calendar() {
                   variant="outline"
                   size="icon"
                   onClick={() => navigateDate('prev')}
+                  className="border-border"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
@@ -211,11 +212,12 @@ export default function Calendar() {
                   variant="outline"
                   size="icon"
                   onClick={() => navigateDate('next')}
+                  className="border-border"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
-              <h2 className="text-xl font-semibold capitalize">{formatViewTitle()}</h2>
+              <h2 className="text-xl font-semibold capitalize text-foreground">{formatViewTitle()}</h2>
             </div>
             
             <div className="flex items-center space-x-2">
@@ -223,7 +225,7 @@ export default function Calendar() {
                 variant={view === 'day' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setView('day')}
-                className={view === 'day' ? 'bg-green-600' : ''}
+                className={view === 'day' ? 'bg-primary text-primary-foreground' : 'border-border'}
               >
                 <Clock className="h-4 w-4 mr-1" />
                 Día
@@ -232,7 +234,7 @@ export default function Calendar() {
                 variant={view === 'week' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setView('week')}
-                className={view === 'week' ? 'bg-green-600' : ''}
+                className={view === 'week' ? 'bg-primary text-primary-foreground' : 'border-border'}
               >
                 <List className="h-4 w-4 mr-1" />
                 Semana
@@ -241,7 +243,7 @@ export default function Calendar() {
                 variant={view === 'month' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setView('month')}
-                className={view === 'month' ? 'bg-green-600' : ''}
+                className={view === 'month' ? 'bg-primary text-primary-foreground' : 'border-border'}
               >
                 <Grid3X3 className="h-4 w-4 mr-1" />
                 Mes
@@ -252,13 +254,13 @@ export default function Calendar() {
       </Card>
 
       {/* Calendar Grid */}
-      <Card>
+      <Card className="bg-card border-border">
         <CardContent className="p-6">
           {view === 'month' && (
             <div className="grid grid-cols-7 gap-1">
               {/* Header Days */}
               {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((day) => (
-                <div key={day} className="p-2 text-center font-medium text-gray-600 border-b">
+                <div key={day} className="p-2 text-center font-medium text-muted-foreground border-b border-border">
                   {day}
                 </div>
               ))}
@@ -272,12 +274,12 @@ export default function Calendar() {
                 return (
                   <div
                     key={date.toISOString()}
-                    className={`min-h-[120px] p-2 border border-gray-200 ${
-                      !isCurrentMonth ? 'bg-gray-50' : 'bg-white'
-                    } ${isToday ? 'bg-blue-50 border-blue-300' : ''}`}
+                    className={`min-h-[120px] p-2 border border-border ${
+                      !isCurrentMonth ? 'bg-muted/50' : 'bg-card'
+                    } ${isToday ? 'bg-primary/5 border-primary/30' : ''}`}
                   >
                     <div className={`text-sm font-medium mb-1 ${
-                      !isCurrentMonth ? 'text-gray-400' : isToday ? 'text-blue-600' : 'text-gray-900'
+                      !isCurrentMonth ? 'text-muted-foreground/50' : isToday ? 'text-primary' : 'text-foreground'
                     }`}>
                       {format(date, 'd')}
                     </div>
@@ -292,7 +294,7 @@ export default function Calendar() {
                         </div>
                       ))}
                       {dayEvents.length > 3 && (
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-muted-foreground">
                           +{dayEvents.length - 3} más
                         </div>
                       )}
@@ -310,15 +312,15 @@ export default function Calendar() {
                 const isToday = isSameDay(date, new Date());
                 
                 return (
-                  <div key={date.toISOString()} className="border rounded-lg">
-                    <div className={`p-3 font-medium border-b ${
-                      isToday ? 'bg-blue-50 text-blue-600' : 'bg-gray-50'
+                  <div key={date.toISOString()} className="border border-border rounded-lg bg-card">
+                    <div className={`p-3 font-medium border-b border-border ${
+                      isToday ? 'bg-primary/5 text-primary' : 'bg-muted/50 text-foreground'
                     }`}>
                       {format(date, 'EEEE, d MMMM yyyy', { locale: es })}
                     </div>
                     <div className="p-3 space-y-2">
                       {dayEvents.length === 0 ? (
-                        <p className="text-gray-500 text-sm">No hay eventos programados</p>
+                        <p className="text-muted-foreground text-sm">No hay eventos programados</p>
                       ) : (
                         dayEvents.map((event) => (
                           <div
@@ -353,19 +355,19 @@ export default function Calendar() {
                                   {event.priority === 'high' ? 'Alta' : event.priority === 'medium' ? 'Media' : 'Baja'}
                                 </Badge>
                                 <div className="flex space-x-1">
-                                  <Button size="sm" variant="outline" onClick={(e) => {
+                                  <Button size="sm" variant="outline" className="border-border" onClick={(e) => {
                                     e.stopPropagation();
                                     setSelectedEvent(event);
                                   }}>
                                     <Eye className="h-3 w-3" />
                                   </Button>
-                                  <Button size="sm" variant="outline" onClick={(e) => {
+                                  <Button size="sm" variant="outline" className="border-border" onClick={(e) => {
                                     e.stopPropagation();
                                     handleEditEvent(event);
                                   }}>
                                     <Edit className="h-3 w-3" />
                                   </Button>
-                                  <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700" onClick={(e) => {
+                                  <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700 border-border" onClick={(e) => {
                                     e.stopPropagation();
                                     handleDeleteEvent(event.id);
                                   }}>
