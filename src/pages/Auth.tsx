@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Truck, LogIn, UserPlus, ArrowLeft, Building, User as UserIcon } from 'lucide-react';
+import { Truck, LogIn, UserPlus, ArrowLeft, Building, User as UserIcon, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -55,25 +56,6 @@ export default function Auth() {
       name,
       role
     });
-    setLoading(false);
-  };
-
-  // Quick login functions for demo accounts
-  const quickLogin = async (demoEmail: string, demoPassword: string) => {
-    console.log('Quick login attempt for:', demoEmail);
-    setLoading(true);
-    
-    // Clear current form data
-    setEmail('');
-    setPassword('');
-    
-    const { error } = await signIn(demoEmail, demoPassword);
-    
-    if (error) {
-      console.error('Quick login failed for', demoEmail, ':', error);
-      toast.error(`Error al acceder como ${demoEmail}: ${error.message}`);
-    }
-    
     setLoading(false);
   };
 
@@ -152,49 +134,20 @@ export default function Auth() {
                   </Button>
                 </form>
                 
-                {/* Accesos Rápidos para Demo */}
+                {/* Instrucciones para demo */}
                 <div className="mt-6 space-y-4">
-                  <div className="text-center">
-                    <p className="text-sm font-medium text-gray-700 mb-3">Acceso Rápido - Cuentas Demo</p>
-                    <p className="text-xs text-gray-500 mb-4">Haz clic en cualquier opción para acceder directamente</p>
-                  </div>
-                  
-                  <div className="grid gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => quickLogin('admin@gruas.com', 'admin123')}
-                      disabled={loading}
-                      className="w-full justify-start hover:bg-green-50"
-                    >
-                      <UserIcon className="h-4 w-4 mr-2" />
-                      <span className="flex-1 text-left">Administrador</span>
-                      <span className="text-xs text-muted-foreground">→ Panel Admin</span>
-                    </Button>
-                    
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => quickLogin('cliente@empresa.com', 'cliente123')}
-                      disabled={loading}
-                      className="w-full justify-start hover:bg-blue-50"
-                    >
-                      <Building className="h-4 w-4 mr-2" />
-                      <span className="flex-1 text-left">Cliente Demo</span>
-                      <span className="text-xs text-muted-foreground">→ Portal Cliente</span>
-                    </Button>
-                    
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => quickLogin('operador@gruas.com', 'operador123')}
-                      disabled={loading}
-                      className="w-full justify-start hover:bg-orange-50"
-                    >
-                      <Truck className="h-4 w-4 mr-2" />
-                      <span className="flex-1 text-left">Operador Demo</span>
-                      <span className="text-xs text-muted-foreground">→ Portal Operador</span>
-                    </Button>
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-start space-x-3">
+                      <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
+                      <div className="text-sm">
+                        <p className="font-medium text-blue-800 mb-2">Para probar el sistema:</p>
+                        <div className="space-y-2 text-blue-700">
+                          <p><strong>1.</strong> Regístrate con cualquier email y contraseña</p>
+                          <p><strong>2.</strong> El sistema te asignará automáticamente el rol de cliente</p>
+                          <p><strong>3.</strong> Para acceder como admin u operador, contacta al administrador</p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </TabsContent>

@@ -59,7 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return profileData;
       }
 
-      console.log('No profile found, user might need to be created');
+      console.log('No profile found for user:', userId);
       return null;
     } catch (err) {
       console.error('Profile fetch error:', err);
@@ -86,7 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setProfile(profileData);
           } else {
             setProfile(null);
-            toast.error('No se encontró el perfil del usuario. Contacta al administrador.');
+            console.warn('No profile found for authenticated user');
           }
         } else {
           setProfile(null);
