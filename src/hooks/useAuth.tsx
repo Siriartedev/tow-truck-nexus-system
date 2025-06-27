@@ -9,13 +9,8 @@ interface UserProfile {
   user_id: string;
   email: string;
   name: string;
-  phone?: string;
   role: 'admin' | 'client' | 'operator';
   active: boolean;
-  rut?: string;
-  address?: string;
-  company_name?: string;
-  pin?: string;
 }
 
 interface AuthContextType {
@@ -47,20 +42,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .from('user_profiles')
         .select('*')
         .eq('user_id', userId)
-        .maybeSingle();
+        .single();
       
       if (error) {
         console.error('Error fetching profile:', error);
         return null;
       }
 
-      if (profileData) {
-        console.log('Profile found:', profileData);
-        return profileData;
-      }
-
-      console.log('No profile found for user:', userId);
-      return null;
+      console.log('Profile found:', profileData);
+      return profileData;
     } catch (err) {
       console.error('Profile fetch error:', err);
       return null;
@@ -68,26 +58,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    let mounted = true;
-
-    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        if (!mounted) return;
-        
         console.log('Auth state changed:', event, session?.user?.email);
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user && event !== 'SIGNED_OUT') {
-          // Fetch user profile
           const profileData = await fetchUserProfile(session.user.id);
-          if (profileData) {
-            setProfile(profileData);
-          } else {
-            setProfile(null);
-            console.warn('No profile found for authenticated user');
-          }
+          setProfile(profileData);
         } else {
           setProfile(null);
         }
@@ -96,41 +75,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     );
 
-    // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!mounted) return;
-      
-      console.log('Initial session check:', session?.user?.email);
+      console.log('Initial session:', session?.user?.email);
       
       if (session?.user) {
         setSession(session);
         setUser(session.user);
-        
-        // Fetch profile for existing session
         fetchUserProfile(session.user.id).then(profileData => {
-          if (mounted) {
-            setProfile(profileData);
-            setLoading(false);
-          }
+          setProfile(profileData);
+          setLoading(false);
         });
       } else {
-        setSession(null);
-        setUser(null);
-        setProfile(null);
         setLoading(false);
       }
     });
 
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, []);
 
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
-      console.log('Attempting sign in for:', email);
+      console.log('Signing in:', email);
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -139,14 +105,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (error) {
         console.error('Sign in error:', error);
-        if (error.message === 'Invalid login credentials') {
-          toast.error('Credenciales incorrectas. Verifica tu email y contraseña.');
-        } else {
-          toast.error('Error al iniciar sesión: ' + error.message);
-        }
+        toast.error('Error al iniciar sesión: ' + error.message);
       } else {
-        console.log('Sign in successful for:', data.user?.email);
-        toast.success('Sesión iniciada correctamente');
+        console.log('Sign in successful');
+        toast.success('Sesión iniciada');
       }
       
       return { error };
@@ -162,13 +124,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signUp = async (email: string, password: string, userData: any = {}) => {
     try {
       setLoading(true);
-      const redirectUrl = `${window.location.origin}/`;
+      console.log('Signing up:', email, userData);
       
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: redirectUrl,
           data: userData
         }
       });
@@ -177,7 +138,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error('Sign up error:', error);
         toast.error('Error al registrarse: ' + error.message);
       } else {
-        toast.success('Usuario registrado correctamente. Puedes iniciar sesión.');
+        console.log('Sign up successful');
+        toast.success('Usuario registrado');
       }
       
       return { error };
@@ -192,7 +154,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
-      // Clear state first
       setUser(null);
       setProfile(null);
       setSession(null);
