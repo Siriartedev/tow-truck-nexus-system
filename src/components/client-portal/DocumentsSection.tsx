@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,12 +13,13 @@ import {
   Calendar,
   Eye
 } from 'lucide-react';
-import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
 import type { ClientDocument } from '@/types/client-portal';
 import { usePDFGenerator } from '@/hooks/usePDFGenerator';
 
 export default function DocumentsSection() {
   const [searchTerm, setSearchTerm] = useState('');
+  const { toast } = useToast();
 
   // Mock data
   const documents: ClientDocument[] = [
