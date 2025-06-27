@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,6 +18,7 @@ import ClientPortal from "./pages/ClientPortal";
 import NotFound from "./pages/NotFound";
 import Invoices from "./pages/Invoices";
 import Reports from "./pages/Reports";
+import Configuration from "./pages/Configuration";
 
 const queryClient = new QueryClient();
 
@@ -42,7 +42,7 @@ const App = () => (
               <Route path="invoices" element={<Invoices />} />
               <Route path="costs" element={<Costs />} />
               <Route path="reports" element={<Reports />} />
-              <Route path="configuration" element={<div className="p-6"><h1 className="text-2xl font-bold">Configuración</h1><p>Módulo en construcción...</p></div>} />
+              <Route path="configuration" element={<Configuration />} />
               <Route path="portal-operator" element={<div className="p-6"><h1 className="text-2xl font-bold">Portal del Operador</h1><p>Módulo en construcción...</p></div>} />
             </Route>
             {/* Client Portal - standalone route */}
