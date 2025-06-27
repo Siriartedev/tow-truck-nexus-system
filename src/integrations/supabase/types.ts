@@ -9,16 +9,341 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      clients: {
+        Row: {
+          active: boolean | null
+          address: string | null
+          contact_person: string | null
+          created_at: string | null
+          email: string
+          id: string
+          name: string
+          phone: string | null
+          rut: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          address?: string | null
+          contact_person?: string | null
+          created_at?: string | null
+          email: string
+          id?: string
+          name: string
+          phone?: string | null
+          rut: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          address?: string | null
+          contact_person?: string | null
+          created_at?: string | null
+          email?: string
+          id?: string
+          name?: string
+          phone?: string | null
+          rut?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      cranes: {
+        Row: {
+          active: boolean | null
+          brand: string
+          capacity: number | null
+          created_at: string | null
+          id: string
+          license_plate: string
+          model: string
+          name: string
+          operator_id: string | null
+          updated_at: string | null
+          year: number | null
+        }
+        Insert: {
+          active?: boolean | null
+          brand: string
+          capacity?: number | null
+          created_at?: string | null
+          id?: string
+          license_plate: string
+          model: string
+          name: string
+          operator_id?: string | null
+          updated_at?: string | null
+          year?: number | null
+        }
+        Update: {
+          active?: boolean | null
+          brand?: string
+          capacity?: number | null
+          created_at?: string | null
+          id?: string
+          license_plate?: string
+          model?: string
+          name?: string
+          operator_id?: string | null
+          updated_at?: string | null
+          year?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cranes_operator_id_fkey"
+            columns: ["operator_id"]
+            isOneToOne: false
+            referencedRelation: "operators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      operators: {
+        Row: {
+          active: boolean | null
+          created_at: string | null
+          email: string
+          id: string
+          license_expiry: string | null
+          license_number: string | null
+          name: string
+          phone: string | null
+          pin: string
+          rut: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string | null
+          email: string
+          id?: string
+          license_expiry?: string | null
+          license_number?: string | null
+          name: string
+          phone?: string | null
+          pin: string
+          rut: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string | null
+          email?: string
+          id?: string
+          license_expiry?: string | null
+          license_number?: string | null
+          name?: string
+          phone?: string | null
+          pin?: string
+          rut?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      service_types: {
+        Row: {
+          active: boolean | null
+          base_price: number | null
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          active?: boolean | null
+          base_price?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          active?: boolean | null
+          base_price?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      services: {
+        Row: {
+          client_id: string
+          client_name: string
+          crane_id: string | null
+          crane_name: string | null
+          created_at: string | null
+          delivery_location: string
+          folio: string
+          id: string
+          license_plate: string | null
+          observations: string | null
+          operator_commission: number | null
+          operator_id: string | null
+          operator_name: string | null
+          pickup_location: string
+          request_date: string
+          service_date: string
+          service_type_id: string
+          service_type_name: string
+          service_value: number | null
+          status: string | null
+          updated_at: string | null
+          vehicle_brand: string | null
+          vehicle_model: string | null
+        }
+        Insert: {
+          client_id: string
+          client_name: string
+          crane_id?: string | null
+          crane_name?: string | null
+          created_at?: string | null
+          delivery_location: string
+          folio: string
+          id?: string
+          license_plate?: string | null
+          observations?: string | null
+          operator_commission?: number | null
+          operator_id?: string | null
+          operator_name?: string | null
+          pickup_location: string
+          request_date: string
+          service_date: string
+          service_type_id: string
+          service_type_name: string
+          service_value?: number | null
+          status?: string | null
+          updated_at?: string | null
+          vehicle_brand?: string | null
+          vehicle_model?: string | null
+        }
+        Update: {
+          client_id?: string
+          client_name?: string
+          crane_id?: string | null
+          crane_name?: string | null
+          created_at?: string | null
+          delivery_location?: string
+          folio?: string
+          id?: string
+          license_plate?: string | null
+          observations?: string | null
+          operator_commission?: number | null
+          operator_id?: string | null
+          operator_name?: string | null
+          pickup_location?: string
+          request_date?: string
+          service_date?: string
+          service_type_id?: string
+          service_type_name?: string
+          service_value?: number | null
+          status?: string | null
+          updated_at?: string | null
+          vehicle_brand?: string | null
+          vehicle_model?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "services_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "services_crane_id_fkey"
+            columns: ["crane_id"]
+            isOneToOne: false
+            referencedRelation: "cranes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "services_operator_id_fkey"
+            columns: ["operator_id"]
+            isOneToOne: false
+            referencedRelation: "operators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "services_service_type_id_fkey"
+            columns: ["service_type_id"]
+            isOneToOne: false
+            referencedRelation: "service_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_profiles: {
+        Row: {
+          active: boolean
+          address: string | null
+          company_name: string | null
+          created_at: string | null
+          email: string
+          id: string
+          name: string
+          phone: string | null
+          pin: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          rut: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          address?: string | null
+          company_name?: string | null
+          created_at?: string | null
+          email: string
+          id?: string
+          name: string
+          phone?: string | null
+          pin?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+          rut?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          address?: string | null
+          company_name?: string | null
+          created_at?: string | null
+          email?: string
+          id?: string
+          name?: string
+          phone?: string | null
+          pin?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+          rut?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_current_user_role: {
+        Args: Record<PropertyKey, never>
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
+      has_role: {
+        Args: { _role: Database["public"]["Enums"]["app_role"] }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "client" | "operator"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +458,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "client", "operator"],
+    },
   },
 } as const
