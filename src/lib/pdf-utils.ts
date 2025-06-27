@@ -1,8 +1,9 @@
+
 import jsPDF from 'jspdf';
 
 export interface PDFOptions {
-  title: string;
-  filename: string;
+  title?: string;
+  filename?: string;
   orientation?: 'portrait' | 'landscape';
   format?: 'a4' | 'letter';
 }

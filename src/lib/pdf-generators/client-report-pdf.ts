@@ -1,4 +1,3 @@
-
 import { PDFGenerator } from '../pdf-utils';
 import type { ClientReportData } from '@/types/reports';
 import type { CompanyConfig } from '@/types/configuration';
@@ -8,7 +7,8 @@ export function generateClientReportPDF(
   filters: { date_from: string; date_to: string },
   companyConfig: CompanyConfig
 ): Blob {
-  const pdf = new PDFGenerator();
+  // Crear PDF con orientación horizontal para mejor visualización de columnas
+  const pdf = new PDFGenerator({ orientation: 'landscape' });
   
   // Header con datos de empresa
   if (companyConfig.logo_url) {
