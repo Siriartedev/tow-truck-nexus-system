@@ -26,6 +26,7 @@ export default function Auth() {
   // Redireccionar automáticamente según el rol después del login
   useEffect(() => {
     if (user && profile) {
+      console.log('Redirecting user with role:', profile.role);
       if (profile.role === 'admin') {
         navigate('/');
       } else if (profile.role === 'client') {
@@ -68,7 +69,11 @@ export default function Auth() {
   // Quick login functions for demo accounts
   const quickLogin = async (demoEmail: string, demoPassword: string) => {
     setLoading(true);
-    await signIn(demoEmail, demoPassword);
+    console.log('Attempting quick login for:', demoEmail);
+    const { error } = await signIn(demoEmail, demoPassword);
+    if (error) {
+      console.error('Quick login failed:', error);
+    }
     setLoading(false);
   };
 
@@ -151,14 +156,16 @@ export default function Auth() {
                 <div className="mt-6 space-y-4">
                   <div className="text-center">
                     <p className="text-sm font-medium text-gray-700 mb-3">Acceso Rápido - Cuentas Demo</p>
+                    <p className="text-xs text-gray-500 mb-4">Haz clic en cualquier opción para acceder directamente</p>
                   </div>
                   
                   <div className="grid gap-2">
                     <Button
+                      type="button"
                       variant="outline"
                       onClick={() => quickLogin('admin@gruas.com', 'admin123')}
                       disabled={loading}
-                      className="w-full justify-start"
+                      className="w-full justify-start hover:bg-green-50"
                     >
                       <UserIcon className="h-4 w-4 mr-2" />
                       <span className="flex-1 text-left">Administrador</span>
@@ -166,24 +173,26 @@ export default function Auth() {
                     </Button>
                     
                     <Button
+                      type="button"
                       variant="outline"
                       onClick={() => quickLogin('cliente@empresa.com', 'cliente123')}
                       disabled={loading}
-                      className="w-full justify-start"
+                      className="w-full justify-start hover:bg-blue-50"
                     >
                       <Building className="h-4 w-4 mr-2" />
-                      <span className="flex-1 text-left">Cliente</span>
+                      <span className="flex-1 text-left">Cliente Demo</span>
                       <span className="text-xs text-muted-foreground">→ Portal Cliente</span>
                     </Button>
                     
                     <Button
+                      type="button"
                       variant="outline"
                       onClick={() => quickLogin('operador@gruas.com', 'operador123')}
                       disabled={loading}
-                      className="w-full justify-start"
+                      className="w-full justify-start hover:bg-orange-50"
                     >
                       <Truck className="h-4 w-4 mr-2" />
-                      <span className="flex-1 text-left">Operador</span>
+                      <span className="flex-1 text-left">Operador Demo</span>
                       <span className="text-xs text-muted-foreground">→ Portal Operador</span>
                     </Button>
                   </div>

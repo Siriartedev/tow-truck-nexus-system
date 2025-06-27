@@ -40,16 +40,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
+
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!mounted) return;
+        
         console.log('Auth state changed:', event, session?.user?.email);
         setSession(session);
         setUser(session?.user ?? null);
         
-        if (session?.user) {
-          // Fetch user profile with better error handling
+        if (session?.user && event !== 'SIGNED_OUT') {
+          // Small delay to ensure the user profile exists in the database
           setTimeout(async () => {
+            if (!mounted) return;
+            
             try {
               const { data: profileData, error } = await supabase
                 .from('user_profiles')
@@ -57,14 +63,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 .eq('user_id', session.user.id)
                 .maybeSingle();
               
-              if (error) {
+              if (error && error.code !== 'PGRST116') {
                 console.error('Error fetching profile:', error);
                 toast.error('Error al cargar el perfil del usuario');
               } else if (!profileData) {
                 console.warn('No profile found for user:', session.user.email);
-                toast.error('No se encontró el perfil del usuario. Contacta al administrador.');
-                // Optionally sign out user without profile
-                await supabase.auth.signOut();
+                // Create a minimal profile if it doesn't exist
+                const { data: newProfile, error: createError } = await supabase
+                  .from('user_profiles')
+                  .insert({
+                    user_id: session.user.id,
+                    email: session.user.email || '',
+                    name: session.user.email || 'Usuario',
+                    role: 'client'
+                  })
+                  .select()
+                  .single();
+                
+                if (createError) {
+                  console.error('Error creating profile:', createError);
+                  toast.error('Error al crear el perfil del usuario');
+                } else {
+                  setProfile(newProfile);
+                }
               } else {
                 console.log('Profile loaded:', profileData);
                 setProfile(profileData);
@@ -73,7 +94,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               console.error('Profile fetch error:', err);
               toast.error('Error de conexión al cargar el perfil');
             }
-          }, 0);
+          }, 100);
         } else {
           setProfile(null);
         }
@@ -84,6 +105,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
+      
       setSession(session);
       setUser(session?.user ?? null);
       if (!session) {
@@ -91,7 +114,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
@@ -141,7 +167,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error('Sign up error:', error);
         toast.error('Error al registrarse: ' + error.message);
       } else {
-        toast.success('Usuario registrado correctamente. Revisa tu email para confirmar.');
+        toast.success('Usuario registrado correctamente. Puedes iniciar sesión.');
       }
       
       return { error };
