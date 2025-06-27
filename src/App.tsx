@@ -12,6 +12,7 @@ import ServiceTypes from "./pages/ServiceTypes";
 import Clients from "./pages/Clients";
 import Cranes from "./pages/Cranes";
 import Operators from "./pages/Operators";
+import Costs from "./pages/Costs";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,7 +35,7 @@ const App = () => (
               {/* Placeholder routes for other modules */}
               <Route path="closures" element={<div className="p-6"><h1 className="text-2xl font-bold">Cierres</h1><p>Módulo en construcción...</p></div>} />
               <Route path="invoices" element={<div className="p-6"><h1 className="text-2xl font-bold">Facturas</h1><p>Módulo en construcción...</p></div>} />
-              <Route path="costs" element={<div className="p-6"><h1 className="text-2xl font-bold">Costos</h1><p>Módulo en construcción...</p></div>} />
+              <Route path="costs" element={<Costs />} />
               <Route path="reports" element={<div className="p-6"><h1 className="text-2xl font-bold">Reportes</h1><p>Módulo en construcción...</p></div>} />
               <Route path="calendar" element={<div className="p-6"><h1 className="text-2xl font-bold">Calendario</h1><p>Módulo en construcción...</p></div>} />
               <Route path="configuration" element={<div className="p-6"><h1 className="text-2xl font-bold">Configuración</h1><p>Módulo en construcción...</p></div>} />
