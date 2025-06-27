@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -113,7 +112,7 @@ export default function ServiceInspectionForm({ service, operator, onBack }: Ser
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-20">
       {/* Header */}
       <header className="bg-gradient-green shadow-sm border-b border-green-darker/20 px-4 py-3">
         <div className="flex items-center justify-between">
@@ -127,9 +126,25 @@ export default function ServiceInspectionForm({ service, operator, onBack }: Ser
               <p className="text-sm text-black/80">{service.folio} - {service.client_name}</p>
             </div>
           </div>
-          <Badge variant="secondary" className="bg-white/20 text-black">
-            {service.status === 'pending' ? 'Pendiente' : 'En Progreso'}
-          </Badge>
+          <div className="flex items-center space-x-4">
+            <Badge variant="secondary" className="bg-white/20 text-black">
+              {service.status === 'pending' ? 'Pendiente' : 'En Progreso'}
+            </Badge>
+            {/* Moved Complete Inspection Button to Header */}
+            <Button 
+              onClick={handleCompleteInspection}
+              size="sm"
+              disabled={!isFormValid()}
+              className={`${
+                isFormValid() 
+                  ? 'bg-white text-green-700 hover:bg-gray-100' 
+                  : 'bg-gray-400 cursor-not-allowed'
+              }`}
+            >
+              <Save className="h-4 w-4 mr-2" />
+              Completar
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -200,23 +215,6 @@ export default function ServiceInspectionForm({ service, operator, onBack }: Ser
             />
           </TabsContent>
         </Tabs>
-
-        {/* Complete Inspection Button */}
-        <div className="fixed bottom-6 right-6">
-          <Button 
-            onClick={handleCompleteInspection}
-            size="lg"
-            disabled={!isFormValid()}
-            className={`shadow-lg ${
-              isFormValid() 
-                ? 'bg-green-600 hover:bg-green-700' 
-                : 'bg-gray-400 cursor-not-allowed'
-            }`}
-          >
-            <Save className="h-4 w-4 mr-2" />
-            Completar Inspección
-          </Button>
-        </div>
       </div>
     </div>
   );
