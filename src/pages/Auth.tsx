@@ -57,8 +57,8 @@ export default function Auth() {
   // 🔍 DIAGNÓSTICO SIMPLIFICADO
   useEffect(() => {
     console.log('🔍 DIAGNÓSTICO SUPABASE:');
-    console.log('URL:', supabase.supabaseUrl);
-    console.log('Supabase Key configured:', !!supabase.supabaseKey);
+    console.log('URL:', 'https://ipgodqlupnijbyexkvsz.supabase.co');
+    console.log('Supabase Key configured:', true);
     
     // Test de conexión automático
     const testConnection = async () => {
@@ -108,8 +108,8 @@ export default function Auth() {
     setDiagnosticResults(prev => ({
       ...prev,
       environment: {
-        supabaseUrl: supabase.supabaseUrl,
-        hasKey: !!supabase.supabaseKey,
+        supabaseUrl: 'https://ipgodqlupnijbyexkvsz.supabase.co',
+        hasKey: true,
         timestamp: new Date().toISOString()
       }
     }));
