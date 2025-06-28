@@ -46,6 +46,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (error) {
         console.error('❌ Error obteniendo perfil:', error);
+        
+        // Si no hay perfil, intentar crearlo desde los metadatos del usuario
+        if (error.code === 'PGRST116') {
+          console.log('🔧 Perfil no encontrado, intentando crear...');
+          
+          const { data: userData } = await supabase.auth.getUser();
+          if (userData.user) {
+            const userMetadata = userData.user.user_metadata || {};
+            const defaultRole = userMetadata.role || 'client';
+            const defaultName = userMetadata.name || userData.user.email?.split('@')[0] || 'Usuario';
+            
+            const { data: newProfile, error: createError } = await supabase
+              .from('user_profiles')
+              .insert({
+                user_id: userId,
+                email: userData.user.email || '',
+                name: defaultName,
+                role: defaultRole,
+                active: true
+              })
+              .select()
+              .single();
+            
+            if (createError) {
+              console.error('❌ Error creando perfil:', createError);
+              return null;
+            }
+            
+            console.log('✅ Perfil creado:', newProfile);
+            return newProfile;
+          }
+        }
+        
         return null;
       }
 
@@ -109,7 +142,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         password,
         options: {
           data: {
-            role: role
+            role: role,
+            name: email.split('@')[0]
           }
         }
       });

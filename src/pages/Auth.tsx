@@ -273,24 +273,42 @@ export default function Auth() {
     }
   };
 
-  // Bypass temporal para testing
-  const handleDemoBypass = () => {
-    console.log('🔧 Using demo bypass...');
+  // Función para crear usuarios demo directamente
+  const createDemoUsers = async () => {
+    console.log('🔧 Creando usuarios demo...');
+    setLoading(true);
     
-    const demoUser = {
-      id: '00000000-0000-0000-0000-000000000001',
-      email: 'admin@demo.com',
-      role: 'admin',
-      name: 'Admin Sistema'
-    };
+    try {
+      for (const account of demoAccounts) {
+        console.log(`📝 Creando usuario: ${account.email}`);
+        
+        // Intentar crear usuario con Supabase Auth
+        const { data, error } = await supabase.auth.signUp({
+          email: account.email,
+          password: account.password,
+          options: {
+            data: {
+              role: account.role,
+              name: account.name
+            }
+          }
+        });
+        
+        if (error && !error.message.includes('already registered')) {
+          console.error(`❌ Error creando ${account.email}:`, error);
+        } else {
+          console.log(`✅ Usuario creado/verificado: ${account.email}`);
+        }
+      }
+      
+      toast.success('Usuarios demo creados/verificados');
+      
+    } catch (error) {
+      console.error('❌ Error creando usuarios demo:', error);
+      toast.error('Error al crear usuarios demo');
+    }
     
-    localStorage.setItem('demo_user', JSON.stringify(demoUser));
-    localStorage.setItem('demo_authenticated', 'true');
-    
-    toast.success('Usando bypass demo - redirigiendo...');
-    setTimeout(() => {
-      window.location.href = '/';
-    }, 1000);
+    setLoading(false);
   };
 
   return (
@@ -308,7 +326,7 @@ export default function Auth() {
             Sistema completamente funcional
           </div>
           
-          <div className="flex gap-2 mt-3 justify-center">
+          <div className="flex gap-2 mt-3 justify-center flex-wrap">
             <Button
               variant="outline"
               size="sm"
@@ -322,10 +340,11 @@ export default function Auth() {
             <Button
               variant="outline"
               size="sm"
-              onClick={handleDemoBypass}
-              className="text-xs bg-red-50 border-red-200 text-red-600 hover:bg-red-100"
+              onClick={createDemoUsers}
+              disabled={loading}
+              className="text-xs bg-blue-50 border-blue-200 text-blue-600 hover:bg-blue-100"
             >
-              🔧 Bypass Demo
+              🔧 Crear Usuarios Demo
             </Button>
           </div>
         </div>
@@ -515,6 +534,11 @@ export default function Auth() {
                 <p><strong>Admin:</strong> admin@demo.com / admin123</p>
                 <p><strong>Cliente:</strong> cliente@demo.com / cliente123</p>
                 <p><strong>Operador:</strong> operador@demo.com / operador123</p>
+              </div>
+              <div className="mt-3">
+                <p className="text-xs text-blue-600">
+                  ⚠️ Si las cuentas no funcionan, haz clic en "Crear Usuarios Demo" arriba
+                </p>
               </div>
             </div>
           </CardContent>
