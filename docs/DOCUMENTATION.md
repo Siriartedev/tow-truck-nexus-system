@@ -1,284 +1,293 @@
 
-# 📚 TMS Grúas - Documentación Completa del Sistema
+# TMS Grúas - Sistema de Gestión de Transporte
+## Documentación Completa del Sistema
 
-## 🏗️ Arquitectura de la Aplicación
+### 🏗️ Arquitectura de la Aplicación
 
-### Stack Tecnológico
-- **Frontend:** React 18 + TypeScript + Vite
-- **Backend:** Supabase (PostgreSQL + Row Level Security)
-- **Autenticación:** Supabase Auth
-- **UI Framework:** Tailwind CSS + shadcn/ui
-- **Estado:** React Context + useState/useEffect
-- **Routing:** React Router DOM v6
-- **Iconografía:** Lucide React
-- **Notificaciones:** Sonner
-
-### Estructura del Proyecto
+#### Estructura General
 ```
-src/
-├── components/          # Componentes reutilizables
-│   ├── ui/             # Componentes base de shadcn/ui
-│   ├── layout/         # Componentes de layout
-│   ├── auth/           # Componentes de autenticación
-│   ├── client-portal/  # Componentes del portal cliente
-│   ├── operator-portal/# Componentes del portal operador
-│   └── configuration/ # Componentes de configuración
-├── hooks/              # Custom hooks
-├── pages/              # Páginas principales
-├── types/              # Definiciones de TypeScript
-├── lib/                # Utilidades y helpers
-└── integrations/       # Integraciones externas
-    └── supabase/       # Cliente y tipos de Supabase
+TMS Grúas/
+├── Frontend (React + TypeScript + Vite)
+├── Backend (Supabase)
+├── Base de Datos (PostgreSQL)
+├── Autenticación (Supabase Auth)
+└── Almacenamiento (Supabase Storage)
 ```
 
-## 📋 Documentación Técnica
+#### Stack Tecnológico
+- **Frontend**: React 18, TypeScript, Tailwind CSS, Shadcn/UI
+- **Backend**: Supabase (PostgreSQL + APIs)
+- **Autenticación**: Supabase Auth con RLS
+- **Routing**: React Router v6
+- **Estado**: React Query + Context API
+- **Estilos**: Tailwind CSS + CSS Modules
+- **Validación**: Zod + React Hook Form
 
-### Base de Datos (Supabase)
+### 📊 Documentación Técnica
 
-#### Tablas Principales
-1. **user_profiles** - Perfiles de usuario
+#### Base de Datos - Esquema Principal
+
+##### Tablas Principales:
+1. **user_profiles** - Perfiles de usuario del sistema
 2. **clients** - Información de clientes
-3. **operators** - Información de operadores
-4. **services** - Servicios de grúa
-5. **cranes** - Información de grúas
-6. **service_types** - Tipos de servicio
+3. **operators** - Datos de operadores de grúa
+4. **cranes** - Inventario de grúas
+5. **service_types** - Tipos de servicios disponibles
+6. **services** - Registro de servicios realizados
 
-#### Políticas RLS (Row Level Security)
-- **user_profiles_read/write**: Usuarios ven su perfil + admins ven todo
-- **clients_access**: Clientes ven sus datos + admins/operadores ven todo
-- **operators_access**: Operadores ven sus datos + admins ven todo
-- **services_access**: Control granular por rol
-- **cranes_access**: Solo admin y operadores
-- **service_types_read/write**: Lectura pública, escritura solo admin
-
-#### Trigger Automático
+##### Relaciones:
 ```sql
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+user_profiles (1) -> (N) clients
+user_profiles (1) -> (N) operators
+operators (1) -> (N) cranes
+clients (1) -> (N) services
+service_types (1) -> (N) services
 ```
 
-### Sistema de Autenticación
+#### Sistema de Roles
+- **Admin**: Acceso completo al sistema
+- **Client**: Portal de cliente con servicios
+- **Operator**: Portal de operador con inspecciones
 
-#### Roles del Sistema
-- **admin**: Acceso completo, gestión de usuarios y configuración
-- **client**: Portal de solicitudes, historial de servicios
-- **operator**: Gestión de servicios asignados, inspecciones
+### 🚀 Prompt de Desarrollo
 
-#### Hook useAuth
-```typescript
-const { user, profile, signIn, signUp, signOut, isAdmin, isClient, isOperator } = useAuth();
-```
+#### Contexto del Sistema
+TMS Grúas es un sistema integral de gestión de servicios de grúa que incluye:
 
-#### Flujo de Autenticación
-1. Usuario se registra/inicia sesión
-2. Trigger automático crea perfil en `user_profiles`
-3. Hook `useAuth` obtiene perfil completo
-4. Redirección automática según rol
+1. **Portal Administrativo**: Gestión completa de servicios, clientes, operadores y grúas
+2. **Portal de Cliente**: Solicitudes de servicio, historial y documentos
+3. **Portal de Operador**: Inspecciones, inventarios y firmas digitales
 
-## 🚀 Prompt de Desarrollo
-
-### Comandos de Desarrollo
+#### Comandos de Desarrollo Frecuentes:
 ```bash
-# Instalar dependencias
-npm install
-
 # Desarrollo local
 npm run dev
 
-# Build para producción
+# Build de producción
 npm run build
 
-# Preview del build
-npm run preview
+# Linting y formato
+npm run lint
+npm run format
+
+# Supabase local
+supabase start
+supabase db reset
 ```
 
-### Variables de Entorno
-```env
+### 📥 Guía de Instalación
+
+#### Requisitos Previos:
+- Node.js 18+
+- npm o yarn
+- Cuenta de Supabase
+
+#### Pasos de Instalación:
+
+1. **Clonar el repositorio**
+```bash
+git clone [repository-url]
+cd tms-gruas
+```
+
+2. **Instalar dependencias**
+```bash
+npm install
+```
+
+3. **Configurar variables de entorno**
+```bash
+# Crear archivo .env.local
 VITE_SUPABASE_URL=https://ipgodqlupnijbyexkvsz.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
-### Estructura de Comandos SQL
-```sql
--- Verificar políticas RLS
-SELECT * FROM pg_policies WHERE schemaname = 'public';
-
--- Verificar usuarios
-SELECT * FROM public.user_profiles;
-
--- Verificar trigger
-SELECT * FROM information_schema.triggers 
-WHERE trigger_name = 'on_auth_user_created';
+4. **Ejecutar migraciones de Supabase**
+```bash
+supabase db reset
 ```
 
-## 📖 Guía de Instalación
+5. **Iniciar desarrollo**
+```bash
+npm run dev
+```
 
-### Requisitos Previos
-- Node.js 18+
-- npm o pnpm
-- Cuenta de Supabase
+### 📖 Manual de Usuario
 
-### Pasos de Instalación
-1. **Clonar repositorio**
-   ```bash
-   git clone [repositorio]
-   cd tms-gruas
-   ```
+#### Para Administradores:
 
-2. **Instalar dependencias**
-   ```bash
-   npm install
-   ```
+##### Dashboard Principal
+- Vista general de servicios activos
+- Métricas de rendimiento
+- Alertas del sistema
 
-3. **Configurar Supabase**
-   - Crear proyecto en Supabase
-   - Ejecutar migraciones SQL
-   - Configurar variables de entorno
+##### Gestión de Servicios
+- Crear nuevos servicios
+- Asignar operadores y grúas
+- Seguimiento de estado
+- Generación de reportes
 
-4. **Ejecutar aplicación**
-   ```bash
-   npm run dev
-   ```
+##### Gestión de Clientes
+- Registro de nuevos clientes
+- Actualización de información
+- Historial de servicios
 
-## 👥 Manual de Usuario
+##### Gestión de Operadores
+- Registro de operadores
+- Asignación de PINs
+- Control de licencias
 
-### Para Administradores
-- **Dashboard completo**: Métricas y resumen general
-- **Gestión de servicios**: CRUD completo de servicios
-- **Gestión de usuarios**: Crear/editar usuarios y roles
-- **Configuración**: Ajustes del sistema
-- **Reportes**: Informes detallados
+##### Gestión de Grúas
+- Inventario de equipos
+- Mantenimiento programado
+- Asignación a operadores
 
-### Para Clientes
-- **Portal cliente**: Vista simplificada
-- **Solicitar servicios**: Formulario de solicitud
-- **Historial**: Ver servicios anteriores
-- **Estado de servicios**: Seguimiento en tiempo real
+#### Para Clientes:
 
-### Para Operadores
-- **Portal operador**: Herramientas específicas
-- **Servicios asignados**: Lista de trabajos
-- **Inspecciones**: Formularios de inspección
-- **Firmas digitales**: Captura de firmas
+##### Portal de Servicios
+- Solicitar nuevos servicios
+- Ver servicios activos
+- Historial de servicios
+- Descargar documentos
 
-### Cuentas Demo
-- **admin@demo.com** / admin123 - Administrador
-- **cliente@demo.com** / cliente123 - Cliente
-- **operador@demo.com** / operador123 - Operador
+##### Documentación
+- Certificados de servicio
+- Facturas y reportes
+- Fotografías de inspección
 
-## 🎨 Sistema Visual
+#### Para Operadores:
 
-### Paleta de Colores
+##### Portal Móvil
+- Ver servicios asignados
+- Realizar inspecciones
+- Capturar fotografías
+- Obtener firmas digitales
+
+##### Inspecciones
+- Checklist de seguridad
+- Inventario de vehículos
+- Documentación fotográfica
+
+### 🎨 Sistema Visual
+
+#### Paleta de Colores:
 ```css
---green-light: #10b981;
---green-medium: #059669;
---green-dark: #065f46;
---gradient-green: linear-gradient(135deg, #10b981 0%, #059669 100%);
+:root {
+  --green-light: #f0fdf4;
+  --green-medium: #22c55e;
+  --green-dark: #15803d;
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-900: #111827;
+}
 ```
 
-### Componentes UI
-- **Botones**: Variantes primary, secondary, outline
-- **Cards**: Bordes suaves, sombras sutiles
-- **Forms**: Validación integrada, estados de error
-- **Modals**: Overlay oscuro, animaciones suaves
+#### Tipografía:
+- **Primaria**: Inter, system-ui
+- **Monospace**: Fira Code, monospace
 
-### Responsive Design
-- **Mobile First**: Diseño optimizado para móviles
-- **Breakpoints**: sm, md, lg, xl
-- **Grid System**: CSS Grid y Flexbox
+#### Componentes UI:
+- Basados en Shadcn/UI
+- Totalmente personalizables
+- Responsive design
 
-## 🖥️ Portal Cliente
+### 🏠 Portal del Cliente
 
-### Características Principales
-- **Dashboard simplificado**: Métricas relevantes
-- **Solicitud de servicios**: Formulario intuitivo
-- **Historial detallado**: Filtros y búsqueda
-- **Estados en tiempo real**: Actualizaciones automáticas
+#### Funcionalidades Principales:
 
-### Flujo de Usuario Cliente
-1. Login con credenciales
-2. Ver dashboard personalizado
-3. Solicitar nuevo servicio
-4. Seguir estado del servicio
-5. Ver historial completo
+##### Dashboard
+- Resumen de servicios
+- Próximas citas
+- Documentos recientes
 
-## 👷 Portal Operador
+##### Solicitudes de Servicio
+- Formulario detallado
+- Selección de tipo de servicio
+- Información de vehículo
+- Ubicaciones de recogida/entrega
 
-### Características Principales
-- **Lista de servicios**: Servicios asignados
-- **Inspecciones detalladas**: Formularios completos
-- **Captura de fotos**: Documentación visual
-- **Firmas digitales**: Confirmación de servicios
+##### Historial
+- Servicios completados
+- Estados de seguimiento
+- Descargas de documentos
 
-### Flujo de Usuario Operador
-1. Login con PIN
-2. Ver servicios asignados
-3. Realizar inspecciones
-4. Capturar evidencias
-5. Completar servicio
+##### Documentos
+- Certificados PDF
+- Fotografías de inspección
+- Facturas digitales
 
-## 🔧 Solución de Problemas
+### 🔧 Portal del Operador
 
-### Errores Comunes
+#### Funcionalidades Principales:
 
-#### Error: "Row violates RLS policy"
-```sql
--- Verificar políticas RLS
-SELECT * FROM pg_policies WHERE tablename = 'user_profiles';
-```
+##### Dashboard Móvil
+- Servicios del día
+- Navegación GPS
+- Estado de grúa
 
-#### Error: "Profile not found"
-```sql
--- Verificar trigger de creación automática
-SELECT * FROM information_schema.triggers 
-WHERE event_object_table = 'users';
-```
+##### Inspecciones Digitales
+- Checklist interactivo
+- Captura de fotos
+- Inventario de vehículo
+- Observaciones
 
-#### Error de autenticación
-1. Verificar variables de entorno
-2. Comprobar configuración de Supabase
-3. Revisar Site URL y Redirect URLs
+##### Firmas Digitales
+- Firma del cliente
+- Firma del operador
+- Validación timestamp
 
-### Testing del Sistema
+##### Documentación
+- Generación automática de reportes
+- Envío por email
+- Almacenamiento en nube
 
-#### Checklist Post-Instalación
-- [ ] Registro de nuevo usuario funciona
-- [ ] Login con cuentas demo funciona
-- [ ] Redirección por roles correcta
-- [ ] Sin errores en consola del navegador
-- [ ] Políticas RLS funcionando
-- [ ] Trigger de perfil automático activo
+### ⚙️ Estado Actual del Sistema
 
-#### Comandos de Verificación
-```sql
--- Verificar usuarios demo
-SELECT email, role FROM public.user_profiles;
+#### ✅ Funcionalidades Implementadas:
+- Autenticación completa con Supabase
+- Sistema de roles (Admin/Cliente/Operador)
+- Base de datos relacional
+- Portales diferenciados por rol
+- Componentes de UI responsivos
+- Sistema de navegación
 
--- Verificar políticas activas
-SELECT * FROM pg_policies WHERE schemaname = 'public';
+#### 🔄 En Desarrollo:
+- Optimización de rendimiento
+- Pruebas de integración
+- Documentación de API
 
--- Verificar trigger
-SELECT trigger_name, event_manipulation, event_object_table 
-FROM information_schema.triggers 
-WHERE trigger_schema = 'public';
-```
+#### 🚨 Problemas Conocidos:
+- Warnings de features del navegador (no críticos)
+- Optimización de carga inicial
+- Configuración de políticas RLS
 
-## 📞 Soporte Técnico
+### 🔐 Seguridad
 
-### Contacto
-- **Desarrollador**: [Información de contacto]
-- **Repositorio**: [URL del repositorio]
-- **Documentación**: docs/DOCUMENTATION.md
+#### Medidas Implementadas:
+- Row Level Security (RLS) en todas las tablas
+- Autenticación JWT con Supabase
+- Validación de entrada en frontend y backend
+- Políticas de acceso por rol
 
-### Recursos Adicionales
-- [Documentación de Supabase](https://supabase.com/docs)
-- [Documentación de React](https://react.dev)
-- [Documentación de Tailwind CSS](https://tailwindcss.com)
-- [shadcn/ui Components](https://ui.shadcn.com)
+#### Usuarios Demo:
+- **Admin**: admin@demo.com / admin123
+- **Cliente**: cliente@demo.com / cliente123  
+- **Operador**: operador@demo.com / operador123
+
+### 📞 Soporte y Mantenimiento
+
+#### Contacto Técnico:
+- Sistema desarrollado con Lovable
+- Documentación actualizada en /docs
+- Logs disponibles en Supabase Dashboard
+
+#### Monitoreo:
+- Supabase Analytics
+- Error tracking en consola
+- Métricas de rendimiento
 
 ---
 
-**Última actualización:** 2025-06-28  
-**Versión del sistema:** 1.0.0  
-**Estado:** ✅ Completamente funcional
+**Última actualización**: 28/06/2025
+**Versión del sistema**: 1.0.0
+**Estado**: Funcional con optimizaciones pendientes

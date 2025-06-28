@@ -1,73 +1,199 @@
-# Welcome to your Lovable project
 
-## Project info
+# 🚛 TMS Grúas - Sistema de Gestión de Transporte
 
-**URL**: https://lovable.dev/projects/229c080f-658f-41d0-ac18-920bbd29ab88
+[![Estado](https://img.shields.io/badge/Estado-Funcional-green)]()
+[![Versión](https://img.shields.io/badge/Versión-1.0.0-blue)]()
+[![Tecnología](https://img.shields.io/badge/Tecnología-React%20+%20Supabase-purple)]()
 
-## How can I edit this code?
+## 🌟 Descripción
 
-There are several ways of editing your application.
+TMS Grúas es un sistema integral de gestión de servicios de grúa que permite la administración completa de servicios, clientes, operadores y equipos a través de portales especializados.
 
-**Use Lovable**
+## 🚀 Inicio Rápido
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/229c080f-658f-41d0-ac18-920bbd29ab88) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+### Credenciales Demo
+```
+🔑 Admin:     admin@demo.com / admin123
+🔑 Cliente:   cliente@demo.com / cliente123  
+🔑 Operador:  operador@demo.com / operador123
 ```
 
-**Edit a file directly in GitHub**
+### Acceso al Sistema
+1. Visita la aplicación en tu navegador
+2. Usa las credenciales demo
+3. Explora los diferentes portales según tu rol
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 🏗️ Arquitectura
 
-**Use GitHub Codespaces**
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Portal Admin  │    │  Portal Cliente │    │ Portal Operador │
+├─────────────────┤    ├─────────────────┤    ├─────────────────┤
+│ • Dashboard     │    │ • Solicitudes   │    │ • Inspecciones  │
+│ • Servicios     │    │ • Historial     │    │ • Inventarios   │
+│ • Clientes      │    │ • Documentos    │    │ • Firmas        │
+│ • Operadores    │    │ • Seguimiento   │    │ • Fotografías   │
+│ • Grúas         │    └─────────────────┘    └─────────────────┘
+│ • Reportes      │              │                        │
+└─────────────────┘              │                        │
+         │                       │                        │
+         └───────────────────────┼────────────────────────┘
+                                 │
+                    ┌─────────────────┐
+                    │    Supabase     │
+                    ├─────────────────┤
+                    │ • PostgreSQL    │
+                    │ • Auth          │
+                    │ • Storage       │
+                    │ • RLS           │
+                    └─────────────────┘
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 📋 Funcionalidades Principales
 
-## What technologies are used for this project?
+### 👨‍💼 Portal Administrativo
+- **Dashboard**: Métricas y resumen general
+- **Servicios**: Gestión completa de servicios de grúa
+- **Clientes**: Administración de base de clientes
+- **Operadores**: Control de personal operativo
+- **Grúas**: Inventario y mantenimiento de equipos
+- **Reportes**: Análisis y documentación
 
-This project is built with:
+### 🏢 Portal de Cliente
+- **Solicitudes**: Crear nuevos pedidos de servicio
+- **Seguimiento**: Estado en tiempo real de servicios
+- **Historial**: Servicios anteriores y documentación
+- **Documentos**: Descargas de certificados y facturas
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### 🚛 Portal de Operador
+- **Inspecciones**: Checklist digital de seguridad
+- **Inventarios**: Documentación de vehículos
+- **Fotografías**: Captura y almacenamiento de evidencias
+- **Firmas**: Validación digital de servicios
 
-## How can I deploy this project?
+## 🛠️ Tecnologías
 
-Simply open [Lovable](https://lovable.dev/projects/229c080f-658f-41d0-ac18-920bbd29ab88) and click on Share -> Publish.
+- **Frontend**: React 18 + TypeScript + Vite
+- **UI**: Tailwind CSS + Shadcn/UI
+- **Backend**: Supabase (PostgreSQL + APIs)
+- **Autenticación**: Supabase Auth + RLS
+- **Estado**: React Query + Context API
+- **Routing**: React Router v6
 
-## Can I connect a custom domain to my Lovable project?
+## 📁 Estructura del Proyecto
 
-Yes, you can!
+```
+src/
+├── components/          # Componentes reutilizables
+│   ├── auth/           # Autenticación
+│   ├── client-portal/  # Portal de cliente
+│   ├── operator-portal/# Portal de operador
+│   └── ui/            # Componentes base UI
+├── pages/              # Páginas principales
+├── hooks/              # Custom hooks
+├── types/              # Definiciones TypeScript
+├── lib/                # Utilidades y helpers
+└── integrations/       # Configuración Supabase
+```
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## 🔐 Sistema de Seguridad
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+### Autenticación
+- JWT Tokens con Supabase Auth
+- Sesiones persistentes
+- Logout automático por inactividad
+
+### Autorización
+- Row Level Security (RLS)
+- Políticas por rol de usuario
+- Validación en frontend y backend
+
+### Roles de Usuario
+```typescript
+type UserRole = 'admin' | 'client' | 'operator'
+```
+
+## 📊 Base de Datos
+
+### Tablas Principales
+- `user_profiles` - Perfiles de usuario
+- `clients` - Información de clientes
+- `operators` - Datos de operadores
+- `cranes` - Inventario de grúas
+- `services` - Registro de servicios
+- `service_types` - Tipos de servicio
+
+### Configuración Supabase
+```sql
+-- URL del proyecto
+https://ipgodqlupnijbyexkvsz.supabase.co
+
+-- Configuración RLS habilitada
+-- Políticas por rol implementadas
+-- Triggers para perfiles automáticos
+```
+
+## 🚀 Instalación y Desarrollo
+
+### Requisitos
+- Node.js 18+
+- npm o yarn
+- Cuenta Supabase
+
+### Variables de Entorno
+```env
+VITE_SUPABASE_URL=https://ipgodqlupnijbyexkvsz.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIs...
+```
+
+### Comandos
+```bash
+# Instalar dependencias
+npm install
+
+# Desarrollo
+npm run dev
+
+# Build producción
+npm run build
+
+# Supabase local
+supabase start
+```
+
+## 📈 Estado del Proyecto
+
+### ✅ Completado
+- [x] Autenticación completa
+- [x] Sistema de roles
+- [x] Portales diferenciados
+- [x] Base de datos relacional
+- [x] UI responsiva
+- [x] Navegación por roles
+
+### 🔄 En Progreso
+- [ ] Optimización de rendimiento
+- [ ] Tests unitarios
+- [ ] Documentación API
+
+### 🚨 Problemas Conocidos
+- Warnings de features del navegador (no críticos)
+- Optimización de carga inicial pendiente
+
+## 📞 Soporte
+
+### Documentación
+- [Documentación Completa](./docs/DOCUMENTATION.md)
+- [Manual de Usuario](./docs/USER_MANUAL.md)
+- [Guía Técnica](./docs/TECHNICAL_GUIDE.md)
+
+### Contacto
+- Sistema desarrollado con Lovable
+- Logs disponibles en Supabase Dashboard
+- Monitoreo de errores activo
+
+---
+
+**🎯 Objetivo**: Proporcionar una solución completa y eficiente para la gestión de servicios de grúa con portales especializados para cada tipo de usuario.
+
+**🏆 Estado**: Sistema funcional listo para uso en producción con optimizaciones pendientes.
