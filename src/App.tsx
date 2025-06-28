@@ -25,6 +25,7 @@ import Reports from "./pages/Reports";
 import Configuration from "./pages/Configuration";
 import Auth from "./pages/Auth";
 import Unauthorized from "./pages/Unauthorized";
+import Index from "./pages/Index";
 
 const queryClient = new QueryClient();
 
@@ -41,13 +42,23 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/unauthorized" element={<Unauthorized />} />
               
+              {/* Index route that handles redirection */}
+              <Route path="/" element={<Index />} />
+              
               {/* Protected admin routes */}
-              <Route path="/" element={
+              <Route path="/dashboard" element={
                 <ProtectedRoute requiredRoles={['admin']}>
                   <MainLayout />
                 </ProtectedRoute>
               }>
                 <Route index element={<Dashboard />} />
+              </Route>
+              
+              <Route path="/admin/*" element={
+                <ProtectedRoute requiredRoles={['admin']}>
+                  <MainLayout />
+                </ProtectedRoute>
+              }>
                 <Route path="services" element={<Services />} />
                 <Route path="service-types" element={<ServiceTypes />} />
                 <Route path="clients" element={<Clients />} />

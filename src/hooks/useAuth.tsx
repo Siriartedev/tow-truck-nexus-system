@@ -1,5 +1,5 @@
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -33,8 +33,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false);
 
-  const fetchUserProfile = async (userId: string) => {
+  const fetchUserProfile = useCallback(async (userId: string) => {
     try {
       console.log('🔍 Obteniendo perfil para usuario:', userId);
       
@@ -88,49 +89,71 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('❌ Error en fetchUserProfile:', err);
       return null;
     }
-  };
+  }, []);
 
   useEffect(() => {
+    if (initialized) return;
+    
     console.log('🔄 Configurando listener de autenticación...');
+    
+    let mounted = true;
     
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!mounted) return;
+        
         console.log('🔄 Estado de auth cambió:', event, session?.user?.email);
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user && event !== 'SIGNED_OUT') {
-          const profileData = await fetchUserProfile(session.user.id);
-          setProfile(profileData);
+          // Usar setTimeout para evitar blocking el auth state change
+          setTimeout(async () => {
+            if (!mounted) return;
+            const profileData = await fetchUserProfile(session.user.id);
+            if (mounted) {
+              setProfile(profileData);
+              setLoading(false);
+            }
+          }, 0);
         } else {
           setProfile(null);
+          setLoading(false);
         }
-        
-        setLoading(false);
       }
     );
 
     // Verificar sesión inicial
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
+      
       console.log('🔍 Verificando sesión inicial:', session?.user?.email);
       
       if (session?.user) {
         setSession(session);
         setUser(session.user);
-        fetchUserProfile(session.user.id).then(profileData => {
-          setProfile(profileData);
-          setLoading(false);
-        });
+        // Usar setTimeout para evitar blocking
+        setTimeout(async () => {
+          if (!mounted) return;
+          const profileData = await fetchUserProfile(session.user.id);
+          if (mounted) {
+            setProfile(profileData);
+            setLoading(false);
+          }
+        }, 0);
       } else {
         setLoading(false);
       }
     });
 
+    setInitialized(true);
+
     return () => {
+      mounted = false;
       console.log('🔄 Limpiando subscription de auth');
       subscription.unsubscribe();
     };
-  }, []);
+  }, [initialized, fetchUserProfile]);
 
   const signUp = async (email: string, password: string, role: 'admin' | 'client' | 'operator' = 'client') => {
     try {
