@@ -7,8 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Truck, LogIn, UserPlus, CheckCircle, AlertCircle } from 'lucide-react';
+import { Truck, LogIn, UserPlus, CheckCircle, AlertCircle, Bug } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 const demoAccounts = [
@@ -47,9 +48,73 @@ export default function Auth() {
   
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('login');
+  const [showDiagnostic, setShowDiagnostic] = useState(false);
+  const [diagnosticResults, setDiagnosticResults] = useState<any>({});
   
   const { signIn, signUp, user, profile } = useAuth();
   const navigate = useNavigate();
+
+  // 🔍 DIAGNÓSTICO TEMPORAL - AGREGAR PARA DEBUG
+  useEffect(() => {
+    console.log('🔍 DIAGNÓSTICO SUPABASE:');
+    console.log('URL:', import.meta.env.VITE_SUPABASE_URL);
+    console.log('ANON KEY:', import.meta.env.VITE_SUPABASE_ANON_KEY ? 'CONFIGURADA ✅' : 'FALTA ❌');
+    console.log('Cliente Supabase:', supabase);
+    
+    // Test de conexión automático
+    const testConnection = async () => {
+      try {
+        console.log('🧪 Probando conexión a DB...');
+        const { data, error } = await supabase.from('service_types').select('*').limit(1);
+        if (error) {
+          console.error('❌ Error conexión DB:', error);
+          setDiagnosticResults(prev => ({ 
+            ...prev, 
+            dbConnection: { success: false, error: error.message }
+          }));
+        } else {
+          console.log('✅ Conexión DB exitosa:', data);
+          setDiagnosticResults(prev => ({ 
+            ...prev, 
+            dbConnection: { success: true, data }
+          }));
+        }
+      } catch (error) {
+        console.error('❌ Error prueba conexión:', error);
+        setDiagnosticResults(prev => ({ 
+          ...prev, 
+          dbConnection: { success: false, error: 'Connection failed' }
+        }));
+      }
+    };
+
+    // Test de sesión actual
+    const testSession = async () => {
+      try {
+        const { data: session, error } = await supabase.auth.getSession();
+        console.log('🔐 Sesión actual:', session, error);
+        setDiagnosticResults(prev => ({ 
+          ...prev, 
+          currentSession: { session, error }
+        }));
+      } catch (error) {
+        console.error('❌ Error obtener sesión:', error);
+      }
+    };
+
+    testConnection();
+    testSession();
+
+    // Agregar info de variables de entorno
+    setDiagnosticResults(prev => ({
+      ...prev,
+      environment: {
+        supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
+        hasAnonKey: !!import.meta.env.VITE_SUPABASE_ANON_KEY,
+        mode: import.meta.env.MODE
+      }
+    }));
+  }, []);
   
   useEffect(() => {
     if (user && profile) {
@@ -79,6 +144,10 @@ export default function Auth() {
     if (error) {
       console.error('❌ Error de login:', error);
       toast.error('Error al iniciar sesión. Verifica tus credenciales.');
+      setDiagnosticResults(prev => ({ 
+        ...prev, 
+        lastLoginError: error 
+      }));
     }
     
     setLoading(false);
@@ -99,6 +168,10 @@ export default function Auth() {
     if (error) {
       console.error('❌ Error de registro:', error);
       toast.error('Error al registrar usuario. Intenta con otro email.');
+      setDiagnosticResults(prev => ({ 
+        ...prev, 
+        lastSignupError: error 
+      }));
     } else {
       toast.success('Usuario registrado exitosamente');
       setActiveTab('login');
@@ -118,9 +191,51 @@ export default function Auth() {
     if (error) {
       console.error('❌ Error en demo login:', error);
       toast.error('Error al acceder con cuenta demo');
+      setDiagnosticResults(prev => ({ 
+        ...prev, 
+        lastDemoLoginError: { email: demoEmail, error }
+      }));
     }
     
     setLoading(false);
+  };
+
+  // Test manual de conexión
+  const runManualDiagnostic = async () => {
+    console.log('🧪 Ejecutando diagnóstico manual...');
+    
+    try {
+      // Test 1: Verificar usuarios en auth
+      const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
+      console.log('👥 Usuarios auth:', authUsers, authError);
+      
+      // Test 2: Verificar perfiles
+      const { data: profiles, error: profilesError } = await supabase
+        .from('user_profiles')
+        .select('*');
+      console.log('👤 Perfiles:', profiles, profilesError);
+      
+      // Test 3: Verificar políticas (esto probablemente falle)
+      const { data: policies, error: policiesError } = await supabase
+        .rpc('pg_policies')
+        .select('*');
+      console.log('🛡️ Políticas:', policies, policiesError);
+      
+      setDiagnosticResults(prev => ({
+        ...prev,
+        manualTest: {
+          authUsers: { data: authUsers, error: authError },
+          profiles: { data: profiles, error: profilesError },
+          policies: { data: policies, error: policiesError }
+        }
+      }));
+      
+      toast.success('Diagnóstico completado - revisar consola');
+      
+    } catch (error) {
+      console.error('❌ Error en diagnóstico manual:', error);
+      toast.error('Error en diagnóstico');
+    }
   };
 
   return (
@@ -137,7 +252,58 @@ export default function Auth() {
             <CheckCircle className="h-4 w-4 mr-1" />
             Sistema completamente funcional
           </div>
+          
+          {/* 🔍 BOTÓN DE DIAGNÓSTICO TEMPORAL */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowDiagnostic(!showDiagnostic)}
+            className="mt-2 text-xs"
+          >
+            <Bug className="h-3 w-3 mr-1" />
+            {showDiagnostic ? 'Ocultar' : 'Mostrar'} Diagnóstico
+          </Button>
         </div>
+
+        {/* 🔍 PANEL DE DIAGNÓSTICO TEMPORAL */}
+        {showDiagnostic && (
+          <Card className="mb-6 border-yellow-200 bg-yellow-50">
+            <CardHeader>
+              <CardTitle className="text-sm flex items-center">
+                <AlertCircle className="h-4 w-4 mr-2 text-yellow-600" />
+                Diagnóstico del Sistema
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-xs space-y-2">
+              <div>
+                <strong>URL Supabase:</strong> {diagnosticResults.environment?.supabaseUrl || 'No configurada'}
+              </div>
+              <div>
+                <strong>Clave Anónima:</strong> {diagnosticResults.environment?.hasAnonKey ? '✅ Configurada' : '❌ Falta'}
+              </div>
+              <div>
+                <strong>Conexión DB:</strong> {
+                  diagnosticResults.dbConnection?.success ? '✅ Exitosa' : 
+                  diagnosticResults.dbConnection?.error ? `❌ ${diagnosticResults.dbConnection.error}` : '⏳ Probando...'
+                }
+              </div>
+              <div>
+                <strong>Sesión Actual:</strong> {
+                  diagnosticResults.currentSession?.session?.user ? 
+                  `✅ ${diagnosticResults.currentSession.session.user.email}` : '❌ Sin sesión'
+                }
+              </div>
+              {diagnosticResults.lastLoginError && (
+                <div className="text-red-600">
+                  <strong>Último Error Login:</strong> {diagnosticResults.lastLoginError.message}
+                </div>
+              )}
+              <Button size="sm" onClick={runManualDiagnostic} className="w-full mt-2">
+                Ejecutar Diagnóstico Completo
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Tabs para Login/Registro */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
