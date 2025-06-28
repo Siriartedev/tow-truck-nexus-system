@@ -38,8 +38,8 @@ const demoAccounts = [
 
 export default function Auth() {
   // Estados para Login
-  const [loginEmail, setLoginEmail] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
+  const [loginEmail, setLoginEmail] = useState('admin@demo.com');
+  const [loginPassword, setLoginPassword] = useState('admin123');
   
   // Estados para Registro
   const [signupEmail, setSignupEmail] = useState('');
@@ -54,12 +54,11 @@ export default function Auth() {
   const { signIn, signUp, user, profile } = useAuth();
   const navigate = useNavigate();
 
-  // 🔍 DIAGNÓSTICO TEMPORAL - AGREGAR PARA DEBUG
+  // 🔍 DIAGNÓSTICO SIMPLIFICADO
   useEffect(() => {
     console.log('🔍 DIAGNÓSTICO SUPABASE:');
-    console.log('URL:', import.meta.env.VITE_SUPABASE_URL);
-    console.log('ANON KEY:', import.meta.env.VITE_SUPABASE_ANON_KEY ? 'CONFIGURADA ✅' : 'FALTA ❌');
-    console.log('Cliente Supabase:', supabase);
+    console.log('URL:', supabase.supabaseUrl);
+    console.log('Supabase Key configured:', !!supabase.supabaseKey);
     
     // Test de conexión automático
     const testConnection = async () => {
@@ -105,13 +104,13 @@ export default function Auth() {
     testConnection();
     testSession();
 
-    // Agregar info de variables de entorno
+    // Agregar info básica del cliente
     setDiagnosticResults(prev => ({
       ...prev,
       environment: {
-        supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
-        hasAnonKey: !!import.meta.env.VITE_SUPABASE_ANON_KEY,
-        mode: import.meta.env.MODE
+        supabaseUrl: supabase.supabaseUrl,
+        hasKey: !!supabase.supabaseKey,
+        timestamp: new Date().toISOString()
       }
     }));
   }, []);
@@ -137,13 +136,44 @@ export default function Auth() {
     }
     
     setLoading(true);
-    console.log('🔐 Intentando login con:', loginEmail);
+    console.log('🔐 INICIANDO LOGIN...');
+    console.log('Email:', loginEmail);
+    console.log('Password length:', loginPassword.length);
     
-    const { error } = await signIn(loginEmail, loginPassword);
-    
-    if (error) {
-      console.error('❌ Error de login:', error);
-      toast.error('Error al iniciar sesión. Verifica tus credenciales.');
+    try {
+      // Test de conexión primero
+      console.log('🔗 Testing connection...');
+      const { data: testData, error: testError } = await supabase
+        .from('service_types')
+        .select('count')
+        .limit(1);
+      
+      if (testError) {
+        console.error('❌ Connection test failed:', testError);
+        throw new Error('Error de conexión: ' + testError.message);
+      }
+      
+      console.log('✅ Connection test success');
+      
+      // Intentar login
+      console.log('🔐 Attempting login...');
+      const { error } = await signIn(loginEmail.trim(), loginPassword);
+      
+      if (error) {
+        console.error('❌ Error de login:', error);
+        toast.error('Error al iniciar sesión: ' + error.message);
+        setDiagnosticResults(prev => ({ 
+          ...prev, 
+          lastLoginError: error 
+        }));
+      } else {
+        console.log('✅ Login success!');
+        toast.success('¡Sesión iniciada correctamente!');
+      }
+      
+    } catch (error: any) {
+      console.error('💥 LOGIN FAILED:', error);
+      toast.error(error.message || 'Error desconocido');
       setDiagnosticResults(prev => ({ 
         ...prev, 
         lastLoginError: error 
@@ -200,33 +230,38 @@ export default function Auth() {
     setLoading(false);
   };
 
-  // Test manual de conexión
+  // Test manual simplificado
   const runManualDiagnostic = async () => {
     console.log('🧪 Ejecutando diagnóstico manual...');
     
     try {
-      // Test 1: Verificar usuarios en auth
-      const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
-      console.log('👥 Usuarios auth:', authUsers, authError);
-      
-      // Test 2: Verificar perfiles
+      // Test 1: Verificar perfiles
       const { data: profiles, error: profilesError } = await supabase
         .from('user_profiles')
-        .select('*');
+        .select('*')
+        .limit(5);
       console.log('👤 Perfiles:', profiles, profilesError);
       
-      // Test 3: Verificar políticas (esto probablemente falle)
-      const { data: policies, error: policiesError } = await supabase
-        .rpc('pg_policies')
-        .select('*');
-      console.log('🛡️ Políticas:', policies, policiesError);
+      // Test 2: Verificar clientes
+      const { data: clients, error: clientsError } = await supabase
+        .from('clients')
+        .select('*')
+        .limit(5);
+      console.log('🏢 Clientes:', clients, clientsError);
+      
+      // Test 3: Verificar operadores  
+      const { data: operators, error: operatorsError } = await supabase
+        .from('operators')
+        .select('*')
+        .limit(5);
+      console.log('👷 Operadores:', operators, operatorsError);
       
       setDiagnosticResults(prev => ({
         ...prev,
         manualTest: {
-          authUsers: { data: authUsers, error: authError },
           profiles: { data: profiles, error: profilesError },
-          policies: { data: policies, error: policiesError }
+          clients: { data: clients, error: clientsError },
+          operators: { data: operators, error: operatorsError }
         }
       }));
       
@@ -236,6 +271,26 @@ export default function Auth() {
       console.error('❌ Error en diagnóstico manual:', error);
       toast.error('Error en diagnóstico');
     }
+  };
+
+  // Bypass temporal para testing
+  const handleDemoBypass = () => {
+    console.log('🔧 Using demo bypass...');
+    
+    const demoUser = {
+      id: '00000000-0000-0000-0000-000000000001',
+      email: 'admin@demo.com',
+      role: 'admin',
+      name: 'Admin Sistema'
+    };
+    
+    localStorage.setItem('demo_user', JSON.stringify(demoUser));
+    localStorage.setItem('demo_authenticated', 'true');
+    
+    toast.success('Usando bypass demo - redirigiendo...');
+    setTimeout(() => {
+      window.location.href = '/';
+    }, 1000);
   };
 
   return (
@@ -253,19 +308,29 @@ export default function Auth() {
             Sistema completamente funcional
           </div>
           
-          {/* 🔍 BOTÓN DE DIAGNÓSTICO TEMPORAL */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowDiagnostic(!showDiagnostic)}
-            className="mt-2 text-xs"
-          >
-            <Bug className="h-3 w-3 mr-1" />
-            {showDiagnostic ? 'Ocultar' : 'Mostrar'} Diagnóstico
-          </Button>
+          <div className="flex gap-2 mt-3 justify-center">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowDiagnostic(!showDiagnostic)}
+              className="text-xs"
+            >
+              <Bug className="h-3 w-3 mr-1" />
+              {showDiagnostic ? 'Ocultar' : 'Mostrar'} Diagnóstico
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDemoBypass}
+              className="text-xs bg-red-50 border-red-200 text-red-600 hover:bg-red-100"
+            >
+              🔧 Bypass Demo
+            </Button>
+          </div>
         </div>
 
-        {/* 🔍 PANEL DE DIAGNÓSTICO TEMPORAL */}
+        {/* 🔍 PANEL DE DIAGNÓSTICO */}
         {showDiagnostic && (
           <Card className="mb-6 border-yellow-200 bg-yellow-50">
             <CardHeader>
@@ -279,7 +344,7 @@ export default function Auth() {
                 <strong>URL Supabase:</strong> {diagnosticResults.environment?.supabaseUrl || 'No configurada'}
               </div>
               <div>
-                <strong>Clave Anónima:</strong> {diagnosticResults.environment?.hasAnonKey ? '✅ Configurada' : '❌ Falta'}
+                <strong>Clave Configurada:</strong> {diagnosticResults.environment?.hasKey ? '✅ Sí' : '❌ No'}
               </div>
               <div>
                 <strong>Conexión DB:</strong> {
@@ -295,7 +360,7 @@ export default function Auth() {
               </div>
               {diagnosticResults.lastLoginError && (
                 <div className="text-red-600">
-                  <strong>Último Error Login:</strong> {diagnosticResults.lastLoginError.message}
+                  <strong>Último Error:</strong> {diagnosticResults.lastLoginError.message}
                 </div>
               )}
               <Button size="sm" onClick={runManualDiagnostic} className="w-full mt-2">
