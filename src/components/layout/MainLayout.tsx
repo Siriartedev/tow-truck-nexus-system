@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Outlet, Link } from 'react-router-dom';
+import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { 
@@ -20,7 +20,7 @@ import {
 import UserMenu from './UserMenu';
 
 const navigation = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Servicios', href: '/services', icon: ClipboardList },
   { name: 'Tipos de Servicio', href: '/service-types', icon: Wrench },
   { name: 'Clientes', href: '/clients', icon: Users },
@@ -36,6 +36,7 @@ const navigation = [
 
 export default function MainLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
 
   return (
     <div className="min-h-screen bg-background">
@@ -57,17 +58,24 @@ export default function MainLayout() {
             <ul role="list" className="flex flex-1 flex-col gap-y-7">
               <li>
                 <ul role="list" className="-mx-2 space-y-1">
-                  {navigation.map((item) => (
-                    <li key={item.name}>
-                      <Link
-                        to={item.href}
-                        className="group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                      >
-                        <item.icon className="h-6 w-6 shrink-0" />
-                        {item.name}
-                      </Link>
-                    </li>
-                  ))}
+                  {navigation.map((item) => {
+                    const isActive = location.pathname === item.href;
+                    return (
+                      <li key={item.name}>
+                        <Link
+                          to={item.href}
+                          className={`group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold transition-colors ${
+                            isActive 
+                              ? 'bg-green-medium text-white' 
+                              : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                          }`}
+                        >
+                          <item.icon className="h-6 w-6 shrink-0" />
+                          {item.name}
+                        </Link>
+                      </li>
+                    );
+                  })}
                 </ul>
               </li>
             </ul>
@@ -106,18 +114,25 @@ export default function MainLayout() {
               <ul role="list" className="flex flex-1 flex-col gap-y-7">
                 <li>
                   <ul role="list" className="-mx-2 space-y-1">
-                    {navigation.map((item) => (
-                      <li key={item.name}>
-                        <Link
-                          to={item.href}
-                          onClick={() => setSidebarOpen(false)}
-                          className="group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                        >
-                          <item.icon className="h-6 w-6 shrink-0" />
-                          {item.name}
-                        </Link>
-                      </li>
-                    ))}
+                    {navigation.map((item) => {
+                      const isActive = location.pathname === item.href;
+                      return (
+                        <li key={item.name}>
+                          <Link
+                            to={item.href}
+                            onClick={() => setSidebarOpen(false)}
+                            className={`group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold transition-colors ${
+                              isActive 
+                                ? 'bg-green-medium text-white' 
+                                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                            }`}
+                          >
+                            <item.icon className="h-6 w-6 shrink-0" />
+                            {item.name}
+                          </Link>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </li>
               </ul>

@@ -45,7 +45,7 @@ const App = () => (
               {/* Index route that handles redirection */}
               <Route path="/" element={<Index />} />
               
-              {/* Protected admin routes */}
+              {/* Protected admin routes with MainLayout */}
               <Route path="/dashboard" element={
                 <ProtectedRoute requiredRoles={['admin']}>
                   <MainLayout />
@@ -54,22 +54,92 @@ const App = () => (
                 <Route index element={<Dashboard />} />
               </Route>
               
-              <Route path="/admin/*" element={
+              <Route path="/services" element={
                 <ProtectedRoute requiredRoles={['admin']}>
                   <MainLayout />
                 </ProtectedRoute>
               }>
-                <Route path="services" element={<Services />} />
-                <Route path="service-types" element={<ServiceTypes />} />
-                <Route path="clients" element={<Clients />} />
-                <Route path="cranes" element={<Cranes />} />
-                <Route path="operators" element={<Operators />} />
-                <Route path="calendar" element={<Calendar />} />
-                <Route path="closures" element={<Closures />} />
-                <Route path="invoices" element={<Invoices />} />
-                <Route path="costs" element={<Costs />} />
-                <Route path="reports" element={<Reports />} />
-                <Route path="configuration" element={<Configuration />} />
+                <Route index element={<Services />} />
+              </Route>
+              
+              <Route path="/service-types" element={
+                <ProtectedRoute requiredRoles={['admin']}>
+                  <MainLayout />
+                </ProtectedRoute>
+              }>
+                <Route index element={<ServiceTypes />} />
+              </Route>
+              
+              <Route path="/clients" element={
+                <ProtectedRoute requiredRoles={['admin']}>
+                  <MainLayout />
+                </ProtectedRoute>
+              }>
+                <Route index element={<Clients />} />
+              </Route>
+              
+              <Route path="/cranes" element={
+                <ProtectedRoute requiredRoles={['admin']}>
+                  <MainLayout />
+                </ProtectedRoute>
+              }>
+                <Route index element={<Cranes />} />
+              </Route>
+              
+              <Route path="/operators" element={
+                <ProtectedRoute requiredRoles={['admin']}>
+                  <MainLayout />
+                </ProtectedRoute>
+              }>
+                <Route index element={<Operators />} />
+              </Route>
+              
+              <Route path="/calendar" element={
+                <ProtectedRoute requiredRoles={['admin']}>
+                  <MainLayout />
+                </ProtectedRoute>
+              }>
+                <Route index element={<Calendar />} />
+              </Route>
+              
+              <Route path="/closures" element={
+                <ProtectedRoute requiredRoles={['admin']}>
+                  <MainLayout />
+                </ProtectedRoute>
+              }>
+                <Route index element={<Closures />} />
+              </Route>
+              
+              <Route path="/invoices" element={
+                <ProtectedRoute requiredRoles={['admin']}>
+                  <MainLayout />
+                </ProtectedRoute>
+              }>
+                <Route index element={<Invoices />} />
+              </Route>
+              
+              <Route path="/costs" element={
+                <ProtectedRoute requiredRoles={['admin']}>
+                  <MainLayout />
+                </ProtectedRoute>
+              }>
+                <Route index element={<Costs />} />
+              </Route>
+              
+              <Route path="/reports" element={
+                <ProtectedRoute requiredRoles={['admin']}>
+                  <MainLayout />
+                </ProtectedRoute>
+              }>
+                <Route index element={<Reports />} />
+              </Route>
+              
+              <Route path="/configuration" element={
+                <ProtectedRoute requiredRoles={['admin']}>
+                  <MainLayout />
+                </ProtectedRoute>
+              }>
+                <Route index element={<Configuration />} />
               </Route>
               
               {/* Client portal - accessible by clients */}
