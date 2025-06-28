@@ -19,6 +19,7 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, role?: 'admin' | 'client' | 'operator') => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   isAdmin: boolean;
   isClient: boolean;
@@ -35,7 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchUserProfile = async (userId: string) => {
     try {
-      console.log('Obteniendo perfil para usuario:', userId);
+      console.log('🔍 Obteniendo perfil para usuario:', userId);
       
       const { data: profileData, error } = await supabase
         .from('user_profiles')
@@ -44,22 +45,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single();
       
       if (error) {
-        console.error('Error obteniendo perfil:', error);
+        console.error('❌ Error obteniendo perfil:', error);
         return null;
       }
 
-      console.log('Perfil encontrado:', profileData);
+      console.log('✅ Perfil encontrado:', profileData);
       return profileData;
     } catch (err) {
-      console.error('Error en fetchUserProfile:', err);
+      console.error('❌ Error en fetchUserProfile:', err);
       return null;
     }
   };
 
   useEffect(() => {
+    console.log('🔄 Configurando listener de autenticación...');
+    
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Estado de auth cambió:', event, session?.user?.email);
+        console.log('🔄 Estado de auth cambió:', event, session?.user?.email);
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -76,7 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Verificar sesión inicial
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Sesión inicial:', session?.user?.email);
+      console.log('🔍 Verificando sesión inicial:', session?.user?.email);
       
       if (session?.user) {
         setSession(session);
@@ -90,13 +93,53 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      console.log('🔄 Limpiando subscription de auth');
+      subscription.unsubscribe();
+    };
   }, []);
+
+  const signUp = async (email: string, password: string, role: 'admin' | 'client' | 'operator' = 'client') => {
+    try {
+      setLoading(true);
+      console.log('📝 Registrando usuario:', email, 'con rol:', role);
+      
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            role: role
+          }
+        }
+      });
+      
+      if (error) {
+        console.error('❌ Error de registro:', error);
+        toast.error(`Error: ${error.message}`);
+        return { error };
+      }
+
+      if (data.user) {
+        console.log('✅ Registro exitoso:', data.user.email);
+        toast.success('¡Usuario registrado correctamente!');
+        return { error: null };
+      }
+      
+      return { error };
+    } catch (err) {
+      console.error('❌ Error en signUp:', err);
+      toast.error('Error de conexión durante el registro');
+      return { error: err };
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
-      console.log('Iniciando sesión:', email);
+      console.log('🔐 Iniciando sesión:', email);
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -104,20 +147,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       
       if (error) {
-        console.error('Error de inicio de sesión:', error);
+        console.error('❌ Error de inicio de sesión:', error);
         toast.error(`Error: ${error.message}`);
         return { error };
       }
 
       if (data.user) {
-        console.log('Inicio de sesión exitoso:', data.user.email);
+        console.log('✅ Inicio de sesión exitoso:', data.user.email);
         toast.success('¡Sesión iniciada correctamente!');
         return { error: null };
       }
       
       return { error };
     } catch (err) {
-      console.error('Error en signIn:', err);
+      console.error('❌ Error en signIn:', err);
       toast.error('Error de conexión');
       return { error: err };
     } finally {
@@ -127,7 +170,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
-      console.log('Cerrando sesión...');
+      console.log('🚪 Cerrando sesión...');
       
       // Limpiar estado primero
       setUser(null);
@@ -136,14 +179,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       const { error } = await supabase.auth.signOut();
       if (error) {
-        console.error('Error al cerrar sesión:', error);
+        console.error('❌ Error al cerrar sesión:', error);
         toast.error('Error al cerrar sesión');
       } else {
-        console.log('Sesión cerrada correctamente');
+        console.log('✅ Sesión cerrada correctamente');
         toast.success('Sesión cerrada');
       }
     } catch (err) {
-      console.error('Error en signOut:', err);
+      console.error('❌ Error en signOut:', err);
       toast.error('Error al cerrar sesión');
     }
   };
@@ -154,6 +197,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     session,
     loading,
     signIn,
+    signUp,
     signOut,
     isAdmin: profile?.role === 'admin',
     isClient: profile?.role === 'client',
